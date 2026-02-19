@@ -1,7 +1,0 @@
-set	tool	n_genomes	comp_mae	cont_mae	wall_clock_s	n_threads	genomes_per_min	genomes_per_min_per_thread
-Set A (Completeness gradient)	CheckM2	600	2.37	0.28	1668.0	32	21.6	0.67
-Set A (Completeness gradient)	CoCoPyE	600	3.74	0.94	1102.4	48	32.7	0.68
-Set A (Completeness gradient)	DeepCheck	600	4.03	0.38	1668.0	32	21.6	0.67
-Set B (Contamination gradient)	CheckM2	1100	0.51	17.26	4536.0	32	14.6	0.45
-Set B (Contamination gradient)	CoCoPyE	1100	3.27	18.43	3210.0	48	20.6	0.43
-Set B (Contamination gradient)	DeepCheck	1100	5.81	24.06	4536.0	32	14.6	0.45

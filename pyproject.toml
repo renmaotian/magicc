@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "magicc-genome"
+version = "0.1.0"
+description = "MAGICC: Metagenome-Assembled Genome Inference of Completeness and Contamination"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.8"
+authors = [
+    {name = "Renmao Tian"},
+]
+keywords = [
+    "metagenomics",
+    "genome-quality",
+    "MAG",
+    "completeness",
+    "contamination",
+    "deep-learning",
+    "bioinformatics",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+dependencies = [
+    "numpy>=1.20",
+    "numba>=0.53",
+    "scipy>=1.7",
+    "h5py>=3.0",
+    "onnxruntime>=1.10",
+]
+
+[project.scripts]
+magicc = "magicc.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/renmaotian/magicc"
+Repository = "https://github.com/renmaotian/magicc"
+Issues = "https://github.com/renmaotian/magicc/issues"
+
+[tool.setuptools.packages.find]
+include = ["magicc*"]
+
+[tool.setuptools.package-data]
+magicc = [
+    "data/normalization_params.json",
+    "data/selected_kmers.txt",
+]

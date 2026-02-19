@@ -1,0 +1,58 @@
+set	tool	level	n	comp_mae	cont_mae	wall_clock_s	genomes_per_min_per_thread	cont_mae_gt20	comp_rmse	cont_rmse	comp_r2	cont_r2
+Motivating A	CheckM2	comp_50%	167	3.28	0.2							
+Motivating A	CheckM2	comp_60%	167	3.48	0.22							
+Motivating A	CheckM2	comp_70%	167	3.47	0.3							
+Motivating A	CheckM2	comp_80%	167	2.54	0.26							
+Motivating A	CheckM2	comp_90%	167	2.39	0.32							
+Motivating A	CheckM2	comp_100%	165	0.06	0.36							
+Motivating A	CheckM2	OVERALL	1000	2.54	0.28	3107.0	0.6					
+Motivating A	CoCoPyE	comp_50%	167	6.53	0.92							
+Motivating A	CoCoPyE	comp_60%	167	3.68	0.61							
+Motivating A	CoCoPyE	comp_70%	167	3.97	0.76							
+Motivating A	CoCoPyE	comp_80%	167	3.4	0.43							
+Motivating A	CoCoPyE	comp_90%	167	2.82	1.0							
+Motivating A	CoCoPyE	comp_100%	165	0.39	0.64							
+Motivating A	CoCoPyE	OVERALL	1000	3.47	0.73	1865.1	0.67					
+Motivating A	DeepCheck	comp_50%	167	5.49	0.37							
+Motivating A	DeepCheck	comp_60%	167	5.72	0.36							
+Motivating A	DeepCheck	comp_70%	167	4.84	0.4							
+Motivating A	DeepCheck	comp_80%	167	4.14	0.52							
+Motivating A	DeepCheck	comp_90%	167	3.48	0.46							
+Motivating A	DeepCheck	comp_100%	165	1.19	0.46							
+Motivating A	DeepCheck	OVERALL	1000	4.15	0.43	29.4	2041.99					
+Motivating B	CheckM2	cont_0%	200	0.09	0.37							
+Motivating B	CheckM2	cont_20%	200	0.21	8.03							
+Motivating B	CheckM2	cont_40%	200	0.66	18.81							
+Motivating B	CheckM2	cont_60%	200	0.46	27.58							
+Motivating B	CheckM2	cont_80%	200	0.67	30.6							
+Motivating B	CheckM2	OVERALL	1000	0.42	17.08	5098.0	0.37	25.76				
+Motivating B	CoCoPyE	cont_0%	200	0.4	0.53							
+Motivating B	CoCoPyE	cont_20%	200	0.66	3.85							
+Motivating B	CoCoPyE	cont_40%	200	1.24	12.66							
+Motivating B	CoCoPyE	cont_60%	200	3.2	29.48							
+Motivating B	CoCoPyE	cont_80%	200	7.36	49.16							
+Motivating B	CoCoPyE	OVERALL	1000	2.57	19.14	3178.1	0.39	30.57				
+Motivating B	DeepCheck	cont_0%	200	1.08	0.48							
+Motivating B	DeepCheck	cont_20%	200	1.92	12.53							
+Motivating B	DeepCheck	cont_40%	200	5.59	26.37							
+Motivating B	DeepCheck	cont_60%	200	9.29	38.52							
+Motivating B	DeepCheck	cont_80%	200	15.83	50.58							
+Motivating B	DeepCheck	OVERALL	1000	6.74	25.7	28.2	2124.31	38.64				
+Motivating C	CheckM2	complete_cross_phylum	149	0.17	19.91							
+Motivating C	CheckM2	complete_within_phylum	51	0.23	12.94							
+Motivating C	CheckM2	cross_phylum	412	14.01	25.08							
+Motivating C	CheckM2	pure	200	3.17	0.28							
+Motivating C	CheckM2	within_phylum	188	14.29	21.9							
+Motivating C	CheckM2	OVERALL	1000	9.13	18.13	5823.0	0.32		14.26	26.69	0.4962	0.533
+Motivating C	CoCoPyE	complete_cross_phylum	149	2.62	24.6							
+Motivating C	CoCoPyE	complete_within_phylum	51	2.52	24.3							
+Motivating C	CoCoPyE	cross_phylum	412	5.43	25.77							
+Motivating C	CoCoPyE	pure	200	4.35	1.03							
+Motivating C	CoCoPyE	within_phylum	188	7.22	24.43							
+Motivating C	CoCoPyE	OVERALL	1000	4.99	20.32	4620.0	0.27		7.27	29.37	0.817	0.7379
+Motivating C	DeepCheck	complete_cross_phylum	149	8.23	30.57							
+Motivating C	DeepCheck	complete_within_phylum	51	3.83	19.44							
+Motivating C	DeepCheck	cross_phylum	412	16.68	33.34							
+Motivating C	DeepCheck	pure	200	4.97	0.4							
+Motivating C	DeepCheck	within_phylum	188	14.2	26.65							
+Motivating C	DeepCheck	OVERALL	1000	11.96	24.37	29.1	2061.24		17.19	35.46	0.4295	0.3307

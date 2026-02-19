@@ -1,0 +1,24 @@
+MAGICC: Machine-learning Approach for Genome Integrity, Completeness, and Contamination assessment
+
+MAGICC is a deep learning framework for predicting genome completeness and contamination from metagenome-assembled genomes (MAGs). The pipeline consists of five sequential phases:
+
+Phase 1 - Data Curation:
+Starting from the GTDB database containing 732,000 genomes, quality filters are applied (completeness > 98%, contamination < 2%, fewer than 100 contigs, N50 > 20 kbp) to obtain 277,000 high-quality genomes. From these, 100,000 genomes are selected via stratified sampling across 110 phyla.
+
+Phase 2 - K-mer Feature Selection:
+From the curated genomes, 2,000 representative genomes (1,000 bacterial + 1,000 archaeal) are selected. Core genes are identified using Prodigal and HMMER with 85 bacterial and 128 archaeal HMM profiles. 9-mer counting is performed using KMC3, and the top 9,249 canonical k-mers are selected based on prevalence across genomes.
+
+Phase 3 - Training Data Synthesis:
+The 100,000 reference genomes are used to generate synthetic training data. Genome fragmentation at 4 quality tiers and contamination injection (within-phylum and cross-phylum using Dirichlet allocation) produce 1 million synthetic genomes split into 800K training, 100K validation, and 100K test sets.
+
+Phase 4 - Feature Extraction (also used at inference time):
+For any input FASTA file, two parallel feature streams are computed:
+(1) K-mer counting: 9,249 canonical 9-mer frequency counts computed via Numba rolling hash
+(2) Assembly statistics: 26 features including contig length metrics, GC composition statistics, and k-mer summary statistics
+All features are normalized using a combination of Z-score, log, min-max, and robust scaling.
+
+Phase 5 - Neural Network Model:
+The model has two branches:
+- K-mer branch: fully connected layers (9,249 -> 4,096 -> 1,024 -> 256) with Squeeze-and-Excitation (SE) attention blocks
+- Assembly branch: fully connected layers (26 -> 128 -> 64)
+The branches are fused via cross-attention where assembly features query k-mer token representations. A prediction head outputs completeness (50-100%) and contamination (0-100%) estimates.

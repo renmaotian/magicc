@@ -1,0 +1,62 @@
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+
+# Large data directories
+data/genomes/
+data/features/magicc_features.h5
+data/gtdb/
+data/splits/
+data/kmer_selection/bacterial_*
+data/kmer_selection/archaeal_*
+data/kmer_selection/*_stats.json
+data/kmer_selection/*_prevalence.tsv
+data/kmer_selection/selected_bacterial_*
+data/kmer_selection/selected_archaeal_*
+data/kmer_selection/selected_kmers_annotated.tsv
+data/features/batch_*
+
+# Benchmark FASTA files and CheckM2 intermediate outputs (large)
+data/benchmarks/*/fasta/
+data/benchmarks/*/checkm2_output/
+data/benchmarks/*/cocopye_raw_output.csv
+data/benchmarks/*/*/fasta/
+data/benchmarks/*/*/checkm2_output/
+data/benchmarks/*/*/cocopye_raw_output.csv
+data/benchmarks/motivating/
+
+# Old benchmark sets (keep v2 metadata/predictions only)
+data/benchmarks/set_A/
+data/benchmarks/set_B/
+
+# Model training intermediates (keep only final ONNX)
+models/best_model*.pt
+models/checkpoint_*.pt
+models/magicc_v2.onnx
+models/best_model_v3_run*.pt
+models/lgbm_*
+models/xgboost_*
+models/*_optuna_study.json
+models/gradient_boosting_*
+models/training_v*_log.txt
+models/training_log.txt
+models/v3_*config.json
+
+# Tools (external dependencies)
+tools/
+
+# Upload logs
+pypi_upload*.log
+
+# Project protocol doc
+MAGICC_Project_Protocol_v5.docx
+
+# Memory benchmark intermediate files
+results/memory_benchmarks/checkm2_output/
+results/memory_benchmarks/cocopye_output.csv
+
+# Progress/protocol docs (too large, project-internal)
+project_progresses_and_results.md
+project_protocol.md

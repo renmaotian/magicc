@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="magicc_logo.png" alt="MAGICC logo" width="300">
+</p>
+
 # MAGICC
 
 **Metagenome-Assembled Genome Inference of Completeness and Contamination**

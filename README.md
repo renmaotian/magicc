@@ -6,7 +6,7 @@
 
 **Metagenome-Assembled Genome Inference of Completeness and Contamination**
 
-Ultra-fast genome quality assessment using core gene k-mer profiles and deep learning.
+Accurate and ultra-fast genome quality assessment using core gene k-mer profiles and deep learning.
 
 ## Installation
 
@@ -80,7 +80,7 @@ Tab-separated file with three columns:
 
 If you use MAGICC in your research, please cite:
 
-> Tian, R. (2026). MAGICC: Ultra-fast genome quality assessment using core gene k-mer profiles and deep learning. *In preparation*.
+> Tian, R. (2026). MAGICC: Accurate and ultra-fast genome quality assessment using core gene k-mer profiles and deep learning. *In preparation*.
 
 ## License
 

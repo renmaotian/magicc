@@ -5,38 +5,25 @@ dist/
 build/
 manuscript/
 
-# Large data files
-data/genomes/
-data/features/magicc_features.h5
-data/gtdb/
-data/kmer_selection/bacterial_core_genes/
-data/kmer_selection/archaeal_core_genes/
-data/benchmarks/*/fasta/
-data/benchmarks/*/labels.npy
-data/benchmarks/*/checkm2_output/
-data/benchmarks/*/ref_input/
-data/benchmarks/*/reference_checkm2/
-data/benchmarks/*/reference_magicc/
-data/benchmarks/*/synthetic/
-data/benchmarks/*/magicc_input/
-data/benchmarks/*/gtdb_comparison/magicc_input/
-data/benchmarks/motivating/
-data/benchmarks/motivating_v2/
-data/benchmarks/set_A/
-data/benchmarks/set_B/
-results/memory_benchmarks/checkm2_output/
-results/memory_benchmarks/cocopye_output/
+# Data and results (not part of the pipeline)
+data/
+results/
+scripts/
+
+# HMM profiles
+85_bcg.hmm
+uacg.hmm
 
 # Training artifacts
 models/*.pt
-models/training_*.json
-models/training_*.txt
+models/training_*
 models/*_log.txt
 models/*_config.json
 models/gradient_boosting_*
 models/lgbm_*
 models/xgboost_*
 models/magicc_v2.onnx
+models/magicc_v3.onnx
 
 # Temp files
 temp_download_*.zip
@@ -45,3 +32,4 @@ logs/
 project_progresses_and_results.md
 project_protocol.md
 tools/
+MANIFEST.in

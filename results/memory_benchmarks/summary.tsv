@@ -1,5 +1,0 @@
-tool	threads	peak_rss_kb	peak_rss_gb	wall_clock_s	wall_clock_formatted	notes
-MAGICC	1	690016	0.66	97.52	1m 38s	End-to-end CLI (k-mer counting + assembly stats + ONNX inference)
-DeepCheck	1	1527740	1.46	724.65	12m 5s	Inference only (requires CheckM2 feature vectors)
-CoCoPyE	48	16699248	15.93	3632	60m 32s	End-to-end (Pfam counting + ML prediction)
-CheckM2	32	19671452	18.76	5197	86m 37s	End-to-end (Prodigal + DIAMOND + ML prediction)

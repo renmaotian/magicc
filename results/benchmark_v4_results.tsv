@@ -1,7 +1,0 @@
-Set	N	Description	Comp_MAE	Comp_RMSE	Comp_R2	Cont_MAE	Cont_RMSE	Cont_R2	Speed_genomes_per_min	Wall_clock_s
-A_v2	1000	Completeness gradient (50-100%), 0% cont	2.5914	4.6538	0.9248	1.478	4.2126		10714.0	5.6
-B_v2	1000	100% comp, contamination gradient (0-80%)	3.1238	5.8483		5.1097	7.7025	0.9232	8571.0	7.0
-C	1000	Patescibacteria, uniform comp/cont	3.3648	5.5162	0.8863	7.4391	10.7572	0.8615	12245.0	4.9
-D	1000	Archaea, uniform comp/cont	5.2039	8.3477	0.7063	7.7673	12.3007	0.819	10909.0	5.5
-E	1000	Mixed genomes	5.7101	9.0971	0.6941	5.8757	9.8074	0.9113	9231.0	6.5
-Overall	5000	All 5 sets combined	3.9988	6.9098	0.833	5.534	9.3839	0.9142	10169.0	29.5

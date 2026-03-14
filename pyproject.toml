@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "magicc"
-version = "0.2.0"
+version = "0.2.1"
 description = "MAGICC: Metagenome-Assembled Genome Inference of Completeness and Contamination"
 readme = "README.md"
 license = {text = "MIT"}

@@ -1,0 +1,12 @@
+metric	value	unit
+completeness_mae	3.918957953944241	%
+contamination_mae	4.323666310650413	%
+completeness_rmse	6.91716128917127	%
+contamination_rmse	7.465705259443864	%
+completeness_r2	0.8240555171942016	
+contamination_r2	0.9490151273345986	
+completeness_medae	1.8656127816840282	%
+contamination_medae	2.3943536007363226	%
+completeness_outlier_pct	3.1	%
+contamination_outlier_pct	2.5	%
+n_genomes	1000.0	

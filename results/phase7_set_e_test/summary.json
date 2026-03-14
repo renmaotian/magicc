@@ -1,0 +1,65 @@
+{
+  "phase": "Phase 7: CLI End-to-End Test",
+  "dataset": "Set E (1,000 genomes)",
+  "model": "magicc_v3.onnx",
+  "accuracy": {
+    "n_genomes": 1000,
+    "completeness_mae": 3.918957953944241,
+    "contamination_mae": 4.323666310650413,
+    "completeness_rmse": 6.91716128917127,
+    "contamination_rmse": 7.465705259443864,
+    "completeness_r2": 0.8240555171942016,
+    "contamination_r2": 0.9490151273345986,
+    "completeness_medae": 1.8656127816840282,
+    "contamination_medae": 2.3943536007363226,
+    "completeness_outlier_pct": 3.1,
+    "contamination_outlier_pct": 2.5
+  },
+  "speed_single_thread": {
+    "label": "Single-thread (1 CPU)",
+    "threads": 1,
+    "wall_clock_s": 74.36382985115051,
+    "n_predictions": 1000,
+    "genomes_per_min": 806.8438664347748,
+    "genomes_per_min_per_thread": 806.8438664347748,
+    "ms_per_genome": 74.36382985115051
+  },
+  "speed_multi_thread": {
+    "label": "Multi-thread (43 CPUs)",
+    "threads": 43,
+    "wall_clock_s": 7.937110662460327,
+    "n_predictions": 1000,
+    "genomes_per_min": 7559.425910965104,
+    "genomes_per_min_per_thread": 175.8006025805838,
+    "ms_per_genome": 7.937110662460327
+  },
+  "verification": {
+    "comp_mae": {
+      "expected": 3.92,
+      "actual": 3.918957953944241,
+      "diff": 0.0010420460557587496,
+      "pass": true
+    },
+    "cont_mae": {
+      "expected": 4.32,
+      "actual": 4.323666310650413,
+      "diff": 0.003666310650412896,
+      "pass": true
+    },
+    "comp_rmse": {
+      "expected": 6.92,
+      "actual": 6.91716128917127,
+      "diff": 0.0028387108287297735,
+      "pass": true
+    },
+    "cont_rmse": {
+      "expected": 7.47,
+      "actual": 7.465705259443864,
+      "diff": 0.004294740556135324,
+      "pass": true
+    }
+  },
+  "verification_overall": true,
+  "multithread_consistency": true,
+  "total_test_time_s": 82.3836772441864
+}

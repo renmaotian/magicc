@@ -1,7 +1,7 @@
 """
 HDF5 Feature Storage Module for MAGICC.
 
-Manages storage for 1,000,000 samples x 9,275 features (9,249 k-mer + 26 assembly).
+Manages storage for 1,000,000 samples x 9,256 features (9,249 k-mer + 7 assembly).
 Uses HDF5 for storage with optimized chunk sizes for batch read/write.
 
 Decision: HDF5 over Zarr because:
@@ -14,7 +14,7 @@ Decision: HDF5 over Zarr because:
 
 Storage layout:
 - /train/kmer_features     (800_000, 9249) float32
-- /train/assembly_features (800_000, 26)   float32
+- /train/assembly_features (800_000, 7)    float32
 - /train/labels            (800_000, 2)    float32  [completeness, contamination]
 - /train/metadata          (800_000,)      structured array
 - Similar for /val and /test
@@ -29,7 +29,7 @@ from typing import Optional, Dict, Tuple, Any
 
 # Default configuration
 DEFAULT_N_KMER = 9249
-DEFAULT_N_ASSEMBLY = 26
+DEFAULT_N_ASSEMBLY = 7
 DEFAULT_SPLITS = {
     'train': 800_000,
     'val': 100_000,

@@ -7,12 +7,12 @@ Architecture:
     Dense(1024) -> BN -> SiLU -> Drop(0.2)
     Dense(256)  -> BN -> SiLU
 
-  Assembly Branch (26 -> 64):
-    Dense(128) -> BN -> SiLU -> Drop(0.2)
-    Dense(64)  -> BN -> SiLU
+  Assembly Branch (7 -> 16):
+    Dense(32) -> BN -> SiLU -> Drop(0.2)
+    Dense(16) -> BN -> SiLU
 
-  Fusion (320 -> 2):
-    Concat(256 + 64 = 320)
+  Fusion (272 -> 2):
+    Concat(256 + 16 = 272)
     Dense(128) -> BN -> SiLU -> Drop(0.1)
     Dense(64)  -> SiLU
     Dense(2)   -> Completeness: Sigmoid*50+50 [50,100], Contamination: Sigmoid*100 [0,100]
@@ -55,19 +55,19 @@ class KmerBranch(nn.Module):
 
 
 class AssemblyBranch(nn.Module):
-    """Assembly statistics processing branch: 26 -> 64 dimensions."""
+    """Assembly statistics processing branch: 7 -> 16 dimensions."""
 
-    def __init__(self, n_assembly_features: int = 26, dropout1: float = 0.2):
+    def __init__(self, n_assembly_features: int = 7, dropout1: float = 0.2):
         super().__init__()
         self.layer1 = nn.Sequential(
-            nn.Linear(n_assembly_features, 128),
-            nn.BatchNorm1d(128),
+            nn.Linear(n_assembly_features, 32),
+            nn.BatchNorm1d(32),
             nn.SiLU(),
             nn.Dropout(dropout1),
         )
         self.layer2 = nn.Sequential(
-            nn.Linear(128, 64),
-            nn.BatchNorm1d(64),
+            nn.Linear(32, 16),
+            nn.BatchNorm1d(16),
             nn.SiLU(),
         )
 
@@ -78,14 +78,14 @@ class AssemblyBranch(nn.Module):
 
 
 class FusionHead(nn.Module):
-    """Fusion and output head: 320 -> 2 dimensions.
+    """Fusion and output head: 272 -> 2 dimensions.
 
     Output activation per task:
     - Completeness: Sigmoid * 50 + 50 -> [50, 100] (uses full sigmoid range)
     - Contamination: Sigmoid * 100 -> [0, 100]
     """
 
-    def __init__(self, fusion_dim: int = 320, dropout1: float = 0.1):
+    def __init__(self, fusion_dim: int = 272, dropout1: float = 0.1):
         super().__init__()
         self.fusion = nn.Sequential(
             nn.Linear(fusion_dim, 128),
@@ -124,7 +124,7 @@ class MAGICCModel(nn.Module):
     n_kmer_features : int
         Number of k-mer input features (default: 9249).
     n_assembly_features : int
-        Number of assembly statistics input features (default: 26).
+        Number of assembly statistics input features (default: 7).
     kmer_dropout1 : float
         Dropout rate for k-mer branch layer 1.
     kmer_dropout2 : float
@@ -140,7 +140,7 @@ class MAGICCModel(nn.Module):
     def __init__(
         self,
         n_kmer_features: int = 9249,
-        n_assembly_features: int = 26,
+        n_assembly_features: int = 7,
         kmer_dropout1: float = 0.4,
         kmer_dropout2: float = 0.2,
         assembly_dropout1: float = 0.2,
@@ -162,7 +162,7 @@ class MAGICCModel(nn.Module):
             dropout1=assembly_dropout1,
         )
         self.fusion_head = FusionHead(
-            fusion_dim=256 + 64,  # kmer_embed + assembly_embed
+            fusion_dim=256 + 16,  # kmer_embed + assembly_embed
             dropout1=fusion_dropout1,
         )
 
@@ -241,7 +241,7 @@ class MAGICCModel(nn.Module):
 
 def build_model(
     n_kmer_features: int = 9249,
-    n_assembly_features: int = 26,
+    n_assembly_features: int = 7,
     use_gradient_checkpointing: bool = True,
     device: str = 'cuda',
 ) -> MAGICCModel:
@@ -374,7 +374,7 @@ class CrossAttentionFusion(nn.Module):
         Dropout for attention weights.
     """
 
-    def __init__(self, kmer_dim: int = 256, assembly_dim: int = 64,
+    def __init__(self, kmer_dim: int = 256, assembly_dim: int = 16,
                  n_heads: int = 4, n_groups: int = 16, dropout: float = 0.1):
         super().__init__()
         self.n_groups = n_groups
@@ -477,7 +477,7 @@ class FusionHeadV3(nn.Module):
     - Contamination: Sigmoid * 100 -> [0, 100]
     """
 
-    def __init__(self, kmer_dim: int = 256, assembly_dim: int = 64,
+    def __init__(self, kmer_dim: int = 256, assembly_dim: int = 16,
                  n_heads: int = 4, n_groups: int = 16,
                  attn_dropout: float = 0.1, fusion_dropout: float = 0.1):
         super().__init__()
@@ -496,7 +496,7 @@ class FusionHeadV3(nn.Module):
             nn.Sigmoid(),
         )
 
-        fusion_input_dim = kmer_dim + assembly_dim  # 256 + 64 = 320
+        fusion_input_dim = kmer_dim + assembly_dim  # 256 + 16 = 272
 
         self.fusion = nn.Sequential(
             nn.Linear(fusion_input_dim, 128),
@@ -550,14 +550,14 @@ class MAGICCModelV3(nn.Module):
         Dense(1024) -> BN -> SiLU -> Drop(0.2) -> SE(1024)
         Dense(256)  -> BN -> SiLU
 
-      Assembly Branch (26 -> 64):
-        Dense(128) -> BN -> SiLU -> Drop(0.2)
-        Dense(64)  -> BN -> SiLU
+      Assembly Branch (7 -> 16):
+        Dense(32) -> BN -> SiLU -> Drop(0.2)
+        Dense(16) -> BN -> SiLU
 
-      Cross-Attention Fusion (256+64 -> 2):
-        CrossAttention(query=assembly_64, key/value=kmer_256)
+      Cross-Attention Fusion (256+16 -> 2):
+        CrossAttention(query=assembly_16, key/value=kmer_256)
         GatedResidual(kmer_original, kmer_attended) -> kmer_fused_256
-        Concat(kmer_fused_256 + assembly_64 = 320)
+        Concat(kmer_fused_256 + assembly_16 = 272)
         Dense(128) -> BN -> SiLU -> Drop(0.1)
         Dense(64) -> SiLU
         Dense(2) -> Completeness: Sigmoid*50+50, Contamination: Sigmoid*100
@@ -567,7 +567,7 @@ class MAGICCModelV3(nn.Module):
     n_kmer_features : int
         Number of k-mer input features (default: 9249).
     n_assembly_features : int
-        Number of assembly statistics input features (default: 26).
+        Number of assembly statistics input features (default: 7).
     kmer_dropout1 : float
         Dropout rate for k-mer branch layer 1.
     kmer_dropout2 : float
@@ -591,7 +591,7 @@ class MAGICCModelV3(nn.Module):
     def __init__(
         self,
         n_kmer_features: int = 9249,
-        n_assembly_features: int = 26,
+        n_assembly_features: int = 7,
         kmer_dropout1: float = 0.4,
         kmer_dropout2: float = 0.2,
         se_reduction: int = 16,
@@ -619,7 +619,7 @@ class MAGICCModelV3(nn.Module):
         )
         self.fusion_head = FusionHeadV3(
             kmer_dim=256,
-            assembly_dim=64,
+            assembly_dim=16,
             n_heads=n_attn_heads,
             n_groups=n_attn_groups,
             attn_dropout=attn_dropout,
@@ -697,7 +697,7 @@ class MAGICCModelV3(nn.Module):
 
 def build_model_v3(
     n_kmer_features: int = 9249,
-    n_assembly_features: int = 26,
+    n_assembly_features: int = 7,
     use_gradient_checkpointing: bool = True,
     device: str = 'cuda',
     **kwargs,

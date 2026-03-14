@@ -1,0 +1,64 @@
+2026-02-09 12:49:57,015 [INFO] === 9-mer Counting on Core Gene Sequences ===
+2026-02-09 12:49:57,015 [INFO] CPUs: 43
+2026-02-09 12:49:57,015 [INFO] 
+--- Bacterial 9-mer Counting ---
+2026-02-09 12:49:57,020 [INFO] Bacteria: 1000 genomes with core genes
+2026-02-09 12:49:57,049 [INFO] Bacteria: Counting 9-mers with 43 workers...
+2026-02-09 12:50:02,733 [INFO]   Bacteria: 200/1000 (20.0%) - 35.2 genomes/sec - ETA: 23s - 131032 unique k-mers so far
+2026-02-09 12:50:07,977 [INFO]   Bacteria: 400/1000 (40.0%) - 36.6 genomes/sec - ETA: 16s - 131070 unique k-mers so far
+2026-02-09 12:50:13,288 [INFO]   Bacteria: 600/1000 (60.0%) - 36.9 genomes/sec - ETA: 11s - 131072 unique k-mers so far
+2026-02-09 12:50:18,746 [INFO]   Bacteria: 800/1000 (80.0%) - 36.9 genomes/sec - ETA: 5s - 131072 unique k-mers so far
+2026-02-09 12:50:24,899 [INFO]   Bacteria: 1000/1000 (100.0%) - 35.9 genomes/sec - ETA: 0s - 131072 unique k-mers so far
+2026-02-09 12:50:24,937 [INFO] Bacteria: Completed in 27.9s
+2026-02-09 12:50:30,538 [INFO]   Saved prevalence to: /home/tianrm/projects/magicc2/data/kmer_selection/bacterial_kmer_prevalence.tsv
+2026-02-09 12:50:30,591 [INFO]   Stats: {
+  "domain": "Bacteria",
+  "n_genomes_total": 1000,
+  "n_genomes_used": 1000,
+  "n_errors": 0,
+  "total_unique_kmers": 131072,
+  "kmers_per_genome_mean": 40516.767,
+  "kmers_per_genome_median": 41638.0,
+  "kmers_per_genome_min": 23069,
+  "kmers_per_genome_max": 49624,
+  "max_prevalence": 992,
+  "prevalence_p50": 297,
+  "prevalence_p90": 496,
+  "prevalence_p99": 671,
+  "kmers_in_all_genomes": 0,
+  "kmers_in_90pct_genomes": 21,
+  "kmers_in_50pct_genomes": 12606,
+  "elapsed_seconds": 27.887770414352417
+}
+2026-02-09 12:50:31,958 [INFO] 
+--- Archaeal 9-mer Counting ---
+2026-02-09 12:50:31,962 [INFO] Archaea: 1000 genomes with core genes
+2026-02-09 12:50:31,991 [INFO] Archaea: Counting 9-mers with 43 workers...
+2026-02-09 12:50:38,516 [INFO]   Archaea: 200/1000 (20.0%) - 30.7 genomes/sec - ETA: 26s - 130961 unique k-mers so far
+2026-02-09 12:50:44,521 [INFO]   Archaea: 400/1000 (40.0%) - 31.9 genomes/sec - ETA: 19s - 131072 unique k-mers so far
+2026-02-09 12:50:51,942 [INFO]   Archaea: 600/1000 (60.0%) - 30.1 genomes/sec - ETA: 13s - 131072 unique k-mers so far
+2026-02-09 12:50:58,880 [INFO]   Archaea: 800/1000 (80.0%) - 29.8 genomes/sec - ETA: 7s - 131072 unique k-mers so far
+2026-02-09 12:51:06,447 [INFO]   Archaea: 1000/1000 (100.0%) - 29.0 genomes/sec - ETA: 0s - 131072 unique k-mers so far
+2026-02-09 12:51:06,505 [INFO] Archaea: Completed in 34.5s
+2026-02-09 12:51:11,019 [INFO]   Saved prevalence to: /home/tianrm/projects/magicc2/data/kmer_selection/archaeal_kmer_prevalence.tsv
+2026-02-09 12:51:11,076 [INFO]   Stats: {
+  "domain": "Archaea",
+  "n_genomes_total": 1000,
+  "n_genomes_used": 1000,
+  "n_errors": 0,
+  "total_unique_kmers": 131072,
+  "kmers_per_genome_mean": 51320.003,
+  "kmers_per_genome_median": 52755.0,
+  "kmers_per_genome_min": 32392,
+  "kmers_per_genome_max": 67234,
+  "max_prevalence": 998,
+  "prevalence_p50": 386,
+  "prevalence_p90": 572,
+  "prevalence_p99": 770,
+  "kmers_in_all_genomes": 0,
+  "kmers_in_90pct_genomes": 136,
+  "kmers_in_50pct_genomes": 27254,
+  "elapsed_seconds": 34.513537645339966
+}
+2026-02-09 12:51:12,635 [INFO] 
+=== 9-mer Counting Complete ===

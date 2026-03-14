@@ -1,0 +1,58 @@
+{
+  "total_genomes_analyzed": 2000,
+  "species_breakdown": {
+    "Salmonella_enterica": 1000,
+    "Listeria_monocytogenes": 1000
+  },
+  "mimag_hq_analysis": {
+    "both_hq": 1671,
+    "checkm2_only_hq": 315,
+    "magicc_only_hq": 4,
+    "neither_hq": 10
+  },
+  "mimag_by_species": {
+    "Salmonella_enterica": {
+      "n_genomes": 1000,
+      "both_hq": 692,
+      "checkm2_only_hq": 298,
+      "magicc_only_hq": 2,
+      "neither_hq": 8
+    },
+    "Listeria_monocytogenes": {
+      "n_genomes": 1000,
+      "both_hq": 979,
+      "checkm2_only_hq": 17,
+      "magicc_only_hq": 2,
+      "neither_hq": 2
+    }
+  },
+  "accuracy_stats": {
+    "Salmonella_enterica": {
+      "n_genomes": 1000,
+      "completeness_mean_diff": -2.792,
+      "completeness_std_diff": 2.13,
+      "completeness_mae": 2.933,
+      "completeness_median_ae": 2.715,
+      "contamination_mean_diff": 4.209,
+      "contamination_std_diff": 1.929,
+      "contamination_mae": 4.232,
+      "contamination_median_ae": 3.951,
+      "completeness_corr": 0.4873,
+      "contamination_corr": 0.3706
+    },
+    "Listeria_monocytogenes": {
+      "n_genomes": 1000,
+      "completeness_mean_diff": -1.45,
+      "completeness_std_diff": 1.084,
+      "completeness_mae": 1.499,
+      "completeness_median_ae": 1.331,
+      "contamination_mean_diff": 1.504,
+      "contamination_std_diff": 1.234,
+      "contamination_mae": 1.528,
+      "contamination_median_ae": 1.325,
+      "completeness_corr": 0.1571,
+      "contamination_corr": 0.5984
+    }
+  },
+  "seed": 123
+}

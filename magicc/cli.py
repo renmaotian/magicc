@@ -31,8 +31,8 @@ _PACKAGE_DIR = Path(__file__).resolve().parent          # magicc/
 _PROJECT_DIR = _PACKAGE_DIR.parent                       # magicc2/ (dev layout)
 _USER_DATA_DIR = Path.home() / '.magicc'
 
-MODEL_URL = "https://github.com/renmaotian/magicc/raw/main/models/magicc_v3.onnx"
-MODEL_FILENAME = "magicc_v3.onnx"
+MODEL_URL = "https://github.com/renmaotian/magicc/raw/main/models/magicc_v4.onnx"
+MODEL_FILENAME = "magicc_v4.onnx"
 
 def _resolve_data_path(*candidates: str) -> str:
     """Return the first candidate path that exists, or the last one as default."""
@@ -168,7 +168,7 @@ def _extract_features_worker(args: Tuple[str, str]) -> Optional[Tuple[str, np.nd
 
     kmer_counts = _worker_kmer_counter.count_contigs(contigs)
     log10_total = _worker_kmer_counter.total_kmer_count(kmer_counts)
-    assembly_feats = compute_assembly_stats(contigs, log10_total, kmer_counts)
+    assembly_feats = compute_assembly_stats(log10_total, kmer_counts)
 
     return (genome_name, kmer_counts.astype(np.float32), assembly_feats.astype(np.float32))
 
@@ -379,7 +379,7 @@ def predict(
     t_norm_start = time.time()
 
     kmer_array = np.stack(kmer_list)           # (n, 9249)
-    assembly_array = np.stack(assembly_list)    # (n, 26)
+    assembly_array = np.stack(assembly_list)    # (n, 7)
 
     kmer_norm = normalizer.normalize_kmer(kmer_array).astype(np.float32)
     assembly_norm = normalizer.normalize_assembly(assembly_array).astype(np.float32)

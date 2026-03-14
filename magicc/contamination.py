@@ -240,6 +240,15 @@ def generate_contaminated_sample(
     actual_completeness = dom_result['completeness']
     used_quality_tier = dom_result['quality_tier']
 
+    # Cap contamination so foreign DNA never exceeds dominant genome DNA.
+    # Since completeness = dominant_actual_bp / dominant_full_length and
+    # contamination = contaminant_bp / dominant_full_length, we require
+    # contamination_rate <= completeness_rate (both as fractions of full length).
+    # This ensures contaminant_bp <= dominant_actual_bp in the assembly.
+    max_contamination = actual_completeness * 100.0  # actual_completeness is 0-1 fraction
+    if target_contamination > max_contamination:
+        target_contamination = max_contamination
+
     # Step 2: Fragment contaminant genomes
     contaminant_contigs = []
     if target_contamination > 0 and len(contaminant_sequences) > 0:

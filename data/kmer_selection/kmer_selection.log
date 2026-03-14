@@ -1,0 +1,36 @@
+2026-02-09 12:51:54,866 [INFO] === K-mer Feature Selection ===
+2026-02-09 12:51:54,978 [INFO] Bacterial k-mers: 131072 total, max prevalence: 992
+2026-02-09 12:51:54,979 [INFO] Archaeal k-mers: 131072 total, max prevalence: 998
+2026-02-09 12:51:54,980 [INFO] 
+Bacterial top 9000 k-mers:
+2026-02-09 12:51:54,981 [INFO]   Prevalence range: 529 - 992 (out of 1000 genomes)
+2026-02-09 12:51:54,981 [INFO]   Prevalence at cutoff (rank 9000): 529
+2026-02-09 12:51:54,981 [INFO] 
+Archaeal top 1000 k-mers:
+2026-02-09 12:51:54,981 [INFO]   Prevalence range: 791 - 998 (out of 1000 genomes)
+2026-02-09 12:51:54,981 [INFO]   Prevalence at cutoff (rank 1000): 791
+2026-02-09 12:51:55,001 [INFO] 
+Canonical check:
+2026-02-09 12:51:55,001 [INFO]   Bacterial: 0 non-canonical (should be 0)
+2026-02-09 12:51:55,001 [INFO]   Archaeal: 0 non-canonical (should be 0)
+2026-02-09 12:51:55,004 [INFO] 
+=== Merge Results ===
+2026-02-09 12:51:55,004 [INFO]   Bacterial k-mers: 9000
+2026-02-09 12:51:55,004 [INFO]   Archaeal k-mers: 1000
+2026-02-09 12:51:55,004 [INFO]   Overlap: 751 k-mers shared between bacterial and archaeal
+2026-02-09 12:51:55,004 [INFO]   Final merged set: 9249 unique canonical 9-mers
+2026-02-09 12:51:55,005 [INFO] 
+Saved to: /home/tianrm/projects/magicc2/data/kmer_selection/selected_kmers.txt
+2026-02-09 12:51:55,005 [INFO] 
+=== Prevalence Distribution Analysis ===
+2026-02-09 12:51:55,171 [INFO]   K-mers from bacteria only: 8249
+2026-02-09 12:51:55,171 [INFO]   K-mers from archaea only: 249
+2026-02-09 12:51:55,171 [INFO]   K-mers from both (overlap): 751
+2026-02-09 12:51:55,172 [INFO] 
+  Overlap k-mers bacterial prevalence: mean=690.2, median=678
+2026-02-09 12:51:55,172 [INFO]   Overlap k-mers archaeal prevalence: mean=851.9, median=843
+2026-02-09 12:51:55,173 [INFO] 
+  All k-mers verified as 9-mers: YES
+2026-02-09 12:51:55,174 [INFO] 
+Stats saved to: /home/tianrm/projects/magicc2/data/kmer_selection/kmer_selection_stats.json
+2026-02-09 12:51:55,203 [INFO] Annotated k-mer list saved to: /home/tianrm/projects/magicc2/data/kmer_selection/selected_kmers_annotated.tsv

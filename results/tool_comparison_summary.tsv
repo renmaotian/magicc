@@ -1,0 +1,5 @@
+tool	n_genomes_total	comp_mae_overall	comp_rmse_overall	comp_r2_overall	comp_outlier_rate	cont_mae_overall	cont_rmse_overall	cont_r2_overall	cont_outlier_rate	avg_speed_genomes_per_min_per_thread	n_threads	total_wall_clock_s
+MAGICC	3200	2.7869	5.4145	0.8967	1.3438	4.0381	6.9277	0.9560	2.1875	1687.0803	1	130.7867
+CheckM2	3200	6.0786	9.7508	0.6794	6.3125	27.7050	38.5260	0.2450	50.0313	0.9514	32	7210.0000
+CoCoPyE	3200	7.9832	12.0915	0.5797	12.5000	22.0245	32.0042	0.5801	41.8750	0.8479	48	5275.3767
+DeepCheck	3200	10.3634	14.5519	0.4779	19.4688	31.1178	42.1456	0.1506	55.1562	2069.8205	1	92.6154

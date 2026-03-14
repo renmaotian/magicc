@@ -1,0 +1,97 @@
+{
+  "total_genomes": 1999,
+  "species_counts": {
+    "Listeria_monocytogenes": 999,
+    "Salmonella_enterica": 1000
+  },
+  "mimag_analysis": {
+    "Listeria_monocytogenes": {
+      "checkm2_hq": 992,
+      "magicc_hq": 976,
+      "checkm2_hq_not_magicc": 18,
+      "magicc_hq_not_checkm2": 2,
+      "agreement": 979,
+      "agreement_pct": 98.0,
+      "disagree_reasons": {
+        "completeness": 1,
+        "contamination": 17
+      }
+    },
+    "Salmonella_enterica": {
+      "checkm2_hq": 992,
+      "magicc_hq": 690,
+      "checkm2_hq_not_magicc": 305,
+      "magicc_hq_not_checkm2": 3,
+      "agreement": 692,
+      "agreement_pct": 69.2,
+      "disagree_reasons": {
+        "contamination": 299,
+        "completeness+contamination": 5,
+        "completeness": 1
+      }
+    }
+  },
+  "accuracy_metrics": {
+    "Listeria_monocytogenes": {
+      "completeness": {
+        "MAE": 1.5651,
+        "RMSE": 1.9922,
+        "R2": -4.2144,
+        "mean_diff": -1.5043,
+        "std_diff": 1.3061,
+        "median_abs_diff": 1.3578
+      },
+      "contamination": {
+        "MAE": 1.5698,
+        "RMSE": 2.1704,
+        "R2": -16.2513,
+        "mean_diff": 1.5384,
+        "std_diff": 1.5311,
+        "median_abs_diff": 1.3479
+      }
+    },
+    "Salmonella_enterica": {
+      "completeness": {
+        "MAE": 2.9768,
+        "RMSE": 3.4163,
+        "R2": -3.6795,
+        "mean_diff": -2.8453,
+        "std_diff": 1.8908,
+        "median_abs_diff": 2.7519
+      },
+      "contamination": {
+        "MAE": 4.2608,
+        "RMSE": 4.6477,
+        "R2": -66.173,
+        "mean_diff": 4.2332,
+        "std_diff": 1.9186,
+        "median_abs_diff": 3.9945
+      }
+    }
+  },
+  "overall": {
+    "total_genomes": 1999,
+    "checkm2_hq": 1984,
+    "magicc_hq": 1666,
+    "checkm2_hq_not_magicc": 323,
+    "magicc_hq_not_checkm2": 5,
+    "agreement": 1671,
+    "agreement_pct": 83.59,
+    "completeness": {
+      "MAE": 2.2713,
+      "RMSE": 2.7968,
+      "R2": -3.8025,
+      "mean_diff": -2.1752,
+      "std_diff": 1.758,
+      "median_abs_diff": 1.8939
+    },
+    "contamination": {
+      "MAE": 2.916,
+      "RMSE": 3.6277,
+      "R2": -33.5032,
+      "mean_diff": 2.8865,
+      "std_diff": 2.1974,
+      "median_abs_diff": 2.5132
+    }
+  }
+}

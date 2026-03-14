@@ -1,0 +1,5 @@
+genome_id	true_completeness	true_contamination	magicc_completeness	magicc_contamination	checkm2_completeness	checkm2_contamination
+genome_1_100se_5lm	84.23	5.0	85.88	3.16	90.1	6.14
+genome_2_100se_50lm	83.24	50.0	82.94	54.12	100.0	40.55
+genome_3_100se_100lm	86.24	100.0	82.53	96.05	100.0	58.43
+genome_4_60se_40lm	59.19	40.0	61.16	54.87	82.64	24.89

@@ -1,0 +1,4 @@
+species	n_genomes	both_hq	checkm2_only_hq	magicc_only_hq	neither_hq	checkm2_hq_total	magicc_hq_total
+Salmonella_enterica	1000	692	298	2	8	990	694
+Listeria_monocytogenes	1000	979	17	2	2	996	981
+Total	2000	1671	315	4	10	1986	1675

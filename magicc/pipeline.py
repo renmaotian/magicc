@@ -5,7 +5,7 @@ Combines all modules into a single pipeline that processes a genome end-to-end:
 1. Fragmentation (simulate MAG assembly artifacts)
 2. Contamination (mix genomes)
 3. K-mer counting (count selected canonical 9-mers)
-4. Assembly statistics (26 features: 20 original + 6 new k-mer summary)
+4. K-mer summary statistics (7 features)
 5. Feature normalization
 6. Storage (write to HDF5)
 """
@@ -65,16 +65,15 @@ class MAGICCPipeline:
         -------
         tuple of (kmer_counts, assembly_features, log10_total_kmer)
             kmer_counts: np.ndarray of shape (n_kmer_features,) - raw counts
-            assembly_features: np.ndarray of shape (26,)
+            assembly_features: np.ndarray of shape (7,)
             log10_total_kmer: float
         """
         # K-mer counting
         kmer_counts = self.kmer_counter.count_contigs(contigs)
         log10_total = self.kmer_counter.total_kmer_count(kmer_counts)
 
-        # Assembly statistics (pass log10 total kmer count AND raw kmer counts
-        # for the 6 new k-mer summary features)
-        assembly_features = compute_assembly_stats(contigs, log10_total, kmer_counts)
+        # K-mer summary statistics (no contigs needed - only kmer_counts)
+        assembly_features = compute_assembly_stats(log10_total, kmer_counts)
 
         return kmer_counts, assembly_features, log10_total
 
@@ -117,7 +116,7 @@ class MAGICCPipeline:
         -------
         dict with keys:
             'kmer_counts': np.ndarray (n_kmer_features,)
-            'assembly_features': np.ndarray (26,)
+            'assembly_features': np.ndarray (7,)
             'completeness': float
             'contamination': float
             'n_contigs': int
@@ -201,7 +200,7 @@ class MAGICCPipeline:
         -------
         dict with keys:
             'kmer_counts': np.ndarray (batch_size, n_kmer_features)
-            'assembly_features': np.ndarray (batch_size, 26)
+            'assembly_features': np.ndarray (batch_size, 7)
             'labels': np.ndarray (batch_size, 2)
             'metadata': np.ndarray structured (batch_size,)
         """

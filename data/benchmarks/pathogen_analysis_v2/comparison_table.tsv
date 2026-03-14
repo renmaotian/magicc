@@ -1,0 +1,6 @@
+genome_id	n_contigs	true_comp	true_cont	magicc_comp	magicc_cont	checkm2_comp	checkm2_cont
+genome_1_100se_5lm	2	100.0	5.0	98.87	6.37	100.0	6.71
+genome_2_100se_20lm	2	100.0	20.0	97.76	24.53	100.0	19.84
+genome_3_100se_50lm	2	100.0	50.0	96.0	60.6	100.0	52.96
+genome_4_100se_100lm	2	100.0	100.0	98.72	92.34	100.0	76.59
+genome_5_60se_40lm	2	60.0	40.0	66.75	39.0	91.85	20.3

@@ -1,0 +1,5 @@
+genome_name	pred_completeness	pred_contamination
+genome_1_100se_5lm	85.8830	3.1608
+genome_2_100se_50lm	82.9414	54.1201
+genome_3_100se_100lm	82.5296	96.0522
+genome_4_60se_40lm	61.1551	54.8717

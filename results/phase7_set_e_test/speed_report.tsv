@@ -1,0 +1,3 @@
+test	threads	wall_clock_s	genomes_per_min	genomes_per_min_per_thread	ms_per_genome
+Single-thread (1 CPU)	1	74.36	806.8	806.8	74.4
+Multi-thread (43 CPUs)	43	7.94	7559.4	175.8	7.9

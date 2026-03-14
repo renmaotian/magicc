@@ -3,17 +3,13 @@ Feature Normalization Pipeline for MAGICC.
 
 Implements streaming/incremental normalization with running statistics:
 - K-mer features: log(count + 1) -> Z-score standardization
-- Assembly statistics:
-  - Log10 for length-based features (total_length, n50, n90, largest_contig,
-    smallest_contig, mean_contig, median_contig, contig_length_std,
-    total_kmer_sum)
-  - Min-max scaling for percentage-based features (gc_mean, gc_std, gc_iqr,
-    gc_bimodality, gc_outlier_fraction, largest_contig_fraction,
-    top10_concentration, n50_mean_ratio, kmer_entropy,
-    unique_kmer_ratio, duplicate_kmer_ratio)
-  - Robust scaling (median + IQR) for count features (contig_count, l50, l90,
-    unique_kmer_count, duplicate_kmer_count)
-  - log10_total_kmer_count is already log-transformed (pass through)
+- Assembly statistics (7 k-mer summary features):
+  - Log10 for large-valued features (log10_total_kmer_count [passthrough, already
+    log-transformed], total_kmer_sum)
+  - Min-max scaling for bounded features (kmer_entropy, unique_kmer_ratio,
+    duplicate_kmer_ratio)
+  - Robust scaling (median + IQR) for count features (unique_kmer_count,
+    duplicate_kmer_count)
 """
 
 import numpy as np
@@ -25,18 +21,12 @@ from magicc.assembly_stats import FEATURE_NAMES, FEATURE_INDEX, N_FEATURES
 
 # Classify assembly features by normalization type
 LOG10_FEATURES = [
-    'total_length', 'n50', 'n90', 'largest_contig', 'smallest_contig',
-    'mean_contig', 'median_contig', 'contig_length_std',
     'total_kmer_sum',
 ]
 MINMAX_FEATURES = [
-    'gc_mean', 'gc_std', 'gc_iqr', 'gc_bimodality',
-    'gc_outlier_fraction', 'largest_contig_fraction',
-    'top10_concentration', 'n50_mean_ratio',
     'kmer_entropy', 'unique_kmer_ratio', 'duplicate_kmer_ratio',
 ]
 ROBUST_FEATURES = [
-    'contig_count', 'l50', 'l90',
     'unique_kmer_count', 'duplicate_kmer_count',
 ]
 PASSTHROUGH_FEATURES = ['log10_total_kmer_count']
@@ -158,7 +148,7 @@ class FeatureNormalizer:
 
     Handles two feature types:
     1. K-mer features (n_kmer_features): log(count+1) -> Z-score
-    2. Assembly statistics (20 features): mixed normalization per feature type
+    2. Assembly statistics (7 features): mixed normalization per feature type
 
     Parameters
     ----------
@@ -170,7 +160,7 @@ class FeatureNormalizer:
 
     def __init__(self, n_kmer_features: int = 9249, reservoir_size: int = 50000):
         self.n_kmer_features = n_kmer_features
-        self.n_assembly_features = N_FEATURES  # 20
+        self.n_assembly_features = N_FEATURES  # 7
 
         # Running stats for k-mer features (after log transform)
         self.kmer_stats = RunningStats(n_kmer_features, reservoir_size)
@@ -205,14 +195,14 @@ class FeatureNormalizer:
         """
         Update assembly normalization statistics with a batch.
 
-        Applies initial transforms (log10 for length features) before tracking stats.
+        Applies initial transforms (log10 for large-valued features) before tracking stats.
 
         Parameters
         ----------
         assembly_features : np.ndarray
-            Raw assembly features, shape (batch_size, 20).
+            Raw assembly features, shape (batch_size, 7).
         """
-        # Apply log10 transform to length-based features
+        # Apply log10 transform to large-valued features
         transformed = assembly_features.copy()
         for idx in LOG10_INDICES:
             transformed[:, idx] = np.log10(transformed[:, idx] + self.assembly_log10_offset)
@@ -232,7 +222,7 @@ class FeatureNormalizer:
         # Avoid division by zero
         self.kmer_std[self.kmer_std < 1e-10] = 1.0
 
-        # Assembly: min-max parameters for percentage features
+        # Assembly: min-max parameters for bounded features
         self.assembly_minmax_min = np.zeros(N_FEATURES)
         self.assembly_minmax_range = np.ones(N_FEATURES)
         for idx in MINMAX_INDICES:
@@ -273,7 +263,7 @@ class FeatureNormalizer:
         Parameters
         ----------
         assembly_features : np.ndarray
-            Raw assembly features, shape (batch_size, 20) or (20,).
+            Raw assembly features, shape (batch_size, 7) or (7,).
 
         Returns
         -------
@@ -290,11 +280,11 @@ class FeatureNormalizer:
 
         result = np.zeros_like(features, dtype=np.float64)
 
-        # Log10 for length-based features
+        # Log10 for large-valued features
         for idx in LOG10_INDICES:
             result[:, idx] = np.log10(features[:, idx] + self.assembly_log10_offset)
 
-        # Min-max scaling for percentage-based features
+        # Min-max scaling for bounded features
         for idx in MINMAX_INDICES:
             result[:, idx] = (features[:, idx] - self.assembly_minmax_min[idx]) / \
                              self.assembly_minmax_range[idx]
@@ -325,12 +315,12 @@ class FeatureNormalizer:
         kmer_counts : np.ndarray
             Raw k-mer counts, shape (batch_size, n_kmer_features).
         assembly_features : np.ndarray
-            Raw assembly features, shape (batch_size, 20).
+            Raw assembly features, shape (batch_size, 7).
 
         Returns
         -------
         np.ndarray
-            Concatenated normalized features, shape (batch_size, n_kmer + 20).
+            Concatenated normalized features, shape (batch_size, n_kmer + 7).
         """
         kmer_norm = self.normalize_kmer(kmer_counts)
         asm_norm = self.normalize_assembly(assembly_features)

@@ -24,6 +24,7 @@ models/lgbm_*
 models/xgboost_*
 models/magicc_v2.onnx
 models/magicc_v3.onnx
+models/magicc_v4.onnx
 
 # Temp files
 temp_download_*.zip

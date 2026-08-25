@@ -1,36 +1,92 @@
+# =============================================================================
+# What this repository publishes
+# =============================================================================
+# This working tree is the full research workspace for the MAGICC study. The
+# PUBLIC repository is deliberately a strict subset: the installable package,
+# its tests, the reproduction workflow, the container and conda specifications,
+# the frozen V5 model, and the small artefacts those three need in order to
+# work from a clean clone.
+#
+# Everything else -- manuscripts, reviewer material, private notes, raw and
+# derived data, training checkpoints, analysis scripts, logs -- is excluded
+# here and belongs either in the data repository, at figshare, or nowhere
+# public at all.
+# =============================================================================
+
+# --- Python build and cache artefacts ----------------------------------------
 __pycache__/
 *.pyc
 *.egg-info/
+.pytest_cache/
 dist/
 build/
+
+# --- Manuscript, reviewer and private material: NEVER publish ----------------
 manuscript/
+manuscript2/
+manuscript3/
+nature_communications/
+project_design_and_protocol*.md
+project_progress_and_results*.md
+supervisor*.md
+info.txt
+*.docx
 
-# Data and results (not part of the pipeline)
-data/
-results/
+# --- Data ---------------------------------------------------------------------
+# The benchmark genomes, splits and per-sample metadata are distributed through
+# the data repository (https://github.com/renmaotian/magicc-data) and figshare,
+# not here. The two files re-included below are the k-mer list and the
+# normalisation parameters that docker/Dockerfile bakes into the image; they
+# are small and the container build fails without them.
+data/*
+!data/features/
+data/features/*
+!data/features/normalization_params.json
+!data/kmer_selection/
+data/kmer_selection/*
+!data/kmer_selection/selected_kmers.txt
+!data/kmer_selection/selected_kmers_annotated.tsv
+
+# --- Results ------------------------------------------------------------------
+# Result files are deposited at figshare. Re-included below: the model card
+# (the container build verifies the bundled model against it), the recorded
+# metrics table that workflow/ checks its reproduction against, and the
+# determinism statement that README.md links to.
+results/*
+!results/revision/
+results/revision/*
+!results/revision/model_card.json
+!results/revision/metrics/
+results/revision/metrics/*
+!results/revision/metrics/ws5.5_table_S2_rebuilt.tsv
+!results/revision/reproducibility/
+results/revision/reproducibility/*
+!results/revision/reproducibility/DETERMINISM.md
+!results/revision/reproducibility/determinism_report.json
+
+# --- Analysis code, third-party tools, logs, run state ------------------------
+# The analysis scripts are released separately (see Code availability).
 scripts/
+tools/
+logs/
+.snakemake/
 
-# HMM profiles
+# --- Large reference inputs to the training pipeline --------------------------
 85_bcg.hmm
 uacg.hmm
 
-# Training artifacts
-models/*.pt
-models/training_*
-models/*_log.txt
-models/*_config.json
-models/gradient_boosting_*
-models/lgbm_*
-models/xgboost_*
-models/magicc_v2.onnx
-models/magicc_v3.onnx
-models/magicc_v4.onnx
+# --- Models -------------------------------------------------------------------
+# Only the frozen, released V5 ONNX artefact is published (via Git LFS).
+# PyTorch checkpoints, superseded ONNX versions, training curves/logs and the
+# two taxonomic-holdout models are excluded: together they are ~65 GB, and the
+# holdout weights belong with the holdout evaluation files at figshare.
+models/*
+!models/magicc_v5.onnx
 
-# Temp files
+# --- Built container images (rebuild with containers/build_containers.sh) -----
+# The definition files docker/Dockerfile and containers/magicc.def ARE tracked.
+containers/*.sif
+containers/*.tar
+
+# --- Temp files ----------------------------------------------------------------
 temp_download_*.zip
-logs/
-*.docx
-project_progresses_and_results.md
-project_protocol.md
-tools/
-MANIFEST.in

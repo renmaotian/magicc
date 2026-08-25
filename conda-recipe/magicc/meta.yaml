@@ -1,0 +1,77 @@
+{% set name = "magicc" %}
+{% set version = "0.3.1" %}
+{% set sha256 = "aa36d2091487af864f264c1caed21ab67aa885cd6a062291629b7b3607e2926c" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  entry_points:
+    - magicc = magicc.cli:main
+  run_exports:
+    - {{ pin_subpackage(name, max_pin="x.x") }}
+
+requirements:
+  host:
+    - python >=3.9
+    - pip
+    - setuptools >=68.0
+    - wheel
+  run:
+    - python >=3.9
+    - numpy >=1.20
+    - numba >=0.53
+    - scipy >=1.7
+    - h5py >=3.0
+    - onnxruntime >=1.10
+
+test:
+  imports:
+    - magicc
+    - magicc.cli
+    - magicc.kmer_counter
+    - magicc.normalization
+  commands:
+    # --help must work with no network access and no model present.
+    - magicc --help
+    - magicc predict --help
+    # The two data resources are shipped inside the package; the ONNX model is
+    # not (it is ~170 MB) and is fetched to ~/.magicc on first prediction.
+    - python -c "import importlib.resources as r; p = r.files('magicc') / 'data' / 'selected_kmers.txt'; assert p.is_file(); assert sum(1 for _ in p.open()) == 9249"
+    - python -c "import importlib.resources as r; assert (r.files('magicc') / 'data' / 'normalization_params.json').is_file()"
+
+about:
+  home: https://github.com/renmaotian/magicc
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: "Genome completeness and contamination estimation from single-copy core-gene k-mer profiles"
+  description: |
+    MAGICC estimates completeness and contamination of bacterial and archaeal
+    draft genomes and metagenome-assembled genomes (MAGs) directly from
+    nucleotide FASTA. It counts a fixed set of 9,249 canonical 9-mers derived
+    from single-copy core genes and feeds them to a small neural network
+    exported to ONNX, so inference requires no gene calling, no HMM search and
+    no reference database at run time.
+
+    Input may be a directory, a single FASTA file, or a text file listing genome
+    paths (--input-list); plain and gzip-compressed FASTA are both accepted.
+
+    NOTE: on first use MAGICC downloads its ~170 MB ONNX model to ~/.magicc.
+    Set --model to point at a pre-staged copy for fully offline operation.
+  doc_url: https://github.com/renmaotian/magicc#readme
+  dev_url: https://github.com/renmaotian/magicc
+
+extra:
+  recipe-maintainers:
+    - renmaotian
+  identifiers:
+    - doi:10.0000/PLACEHOLDER-REPLACE-WITH-PUBLISHED-DOI

@@ -1,0 +1,20 @@
+# Keep the Docker build context small and deterministic.
+# Only the package source, packaging metadata, the frozen model and the three
+# small resource files referenced by docker/Dockerfile are needed.
+*
+!pyproject.toml
+!README.md
+!LICENSE
+!MANIFEST.in
+!magicc/
+!docker/requirements-lock.txt
+!models/magicc_v5.onnx
+!data/features/normalization_params.json
+!data/kmer_selection/selected_kmers.txt
+!data/kmer_selection/selected_kmers_annotated.tsv
+!results/revision/model_card.json
+
+# ...but never ship caches or build leftovers from the excluded-by-negation dirs
+magicc/__pycache__/
+magicc/**/__pycache__/
+**/*.pyc

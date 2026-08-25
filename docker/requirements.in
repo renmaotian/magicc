@@ -1,0 +1,7 @@
+# MAGICC runtime dependencies, pinned to the exact versions used for every
+# number in the revised manuscript (conda env `magicc2`, 2026-07-26).
+numpy==1.26.4
+numba==0.63.1
+scipy==1.17.0
+h5py==3.15.1
+onnxruntime==1.23.2

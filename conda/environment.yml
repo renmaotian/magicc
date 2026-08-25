@@ -1,0 +1,45 @@
+# =============================================================================
+# MAGICC runtime environment                                        (WS7.3)
+#
+# Addresses R1-M6 / R1-m17: a conda/mamba environment with fully pinned
+# versions, plus a machine-generated conda-lock file for exact reproduction.
+#
+#   mamba env create -f conda/environment.yml
+#   conda activate magicc
+#   pip install --no-deps .          # or: pip install magicc==0.3.1
+#
+# NOTE: the PyPI distribution is named `magicc`. There is no `magicc-genome`
+# package; that name does not exist on PyPI.
+#
+# For an EXACT, solver-free reproduction use the lock file instead:
+#   conda-lock install --name magicc conda/conda-lock.yml
+# or
+#   mamba create --name magicc --file conda/conda-linux-64.lock
+#
+# Version pins are the exact versions of conda env `magicc2`, the environment
+# in which every number in the revised manuscript was produced.  onnxruntime is
+# installed from PyPI because conda-forge does not package 1.23.2 for CPython
+# 3.11 (its 1.23.x builds are py312+); the PyPI wheel is the same upstream
+# CPU build and is hash-pinned in docker/requirements-lock.txt.
+# =============================================================================
+name: magicc
+channels:
+  - conda-forge
+  - nodefaults
+platforms:
+  - linux-64
+  - osx-64
+  - osx-arm64
+dependencies:
+  - python=3.11.9
+  - numpy=1.26.4
+  - numba=0.63.1
+  - llvmlite=0.46.0
+  - scipy=1.17.0
+  - h5py=3.15.1
+  - hdf5=1.14.6
+  # pip itself is deliberately unpinned here; conda-lock records the exact
+  # resolved version in conda/conda-lock.yml, which is the authoritative pin.
+  - pip
+  - pip:
+      - onnxruntime==1.23.2

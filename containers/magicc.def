@@ -1,0 +1,85 @@
+# =============================================================================
+# MAGICC — Apptainer/Singularity definition                       (WS7.2)
+#
+# Addresses R1-M6 / R1-m17: a container usable on HPC systems where Docker is
+# unavailable.  This definition converts the *same* pinned Docker image built
+# from docker/Dockerfile, so the Apptainer and Docker images are byte-for-byte
+# the same root filesystem and cannot drift apart.
+#
+# ---------------------------------------------------------------------------
+# BUILD (two supported routes)
+# ---------------------------------------------------------------------------
+# (a) From a locally built Docker image (route used for the released SIF):
+#       docker build -f docker/Dockerfile -t magicc:0.3.1 .
+#       apptainer build containers/magicc_0.3.1.sif docker-daemon://magicc:0.3.1
+#
+#     This route needs NO root and NO user namespaces.
+#
+# (b) From this definition file directly (requires root or --fakeroot):
+#       sudo apptainer build containers/magicc_0.3.1.sif containers/magicc.def
+#     or, if unprivileged user namespaces are permitted on the host:
+#       apptainer build --fakeroot containers/magicc_0.3.1.sif containers/magicc.def
+#
+# ---------------------------------------------------------------------------
+# RUN
+# ---------------------------------------------------------------------------
+#   apptainer run --containall \
+#       --bind /path/to/genomes:/data \
+#       --env NUMBA_CACHE_DIR=/tmp/numba_cache \
+#       containers/magicc_0.3.1.sif \
+#       predict --input /data --output /data/predictions.tsv --threads 8
+#
+# Running an Apptainer container requires either a setuid-root `starter-suid`
+# (the standard system package install) or unprivileged user namespaces.  See
+# results/revision/reproducibility/REPRODUCIBILITY.md for the host on which
+# this was verified and the one on which execution is blocked.
+# =============================================================================
+
+Bootstrap: docker-daemon
+From: magicc:0.3.1
+
+%labels
+    org.opencontainers.image.title        MAGICC
+    org.opencontainers.image.version      0.3.1
+    org.opencontainers.image.licenses     MIT
+    org.opencontainers.image.source       https://github.com/renmaotian/magicc
+    org.magicc.model.version              V5
+    org.magicc.model.sha256               b84346650ce21a66acd488e9f2eab1ca72333ba4dd50fed79070ec182b2b3096
+
+%environment
+    export NUMBA_CACHE_DIR="${NUMBA_CACHE_DIR:-/tmp/numba_cache}"
+    export PYTHONDONTWRITEBYTECODE=1
+    export PYTHONUNBUFFERED=1
+
+%post
+    # Verify the bundled frozen V5 model survived the Docker -> SIF conversion.
+    set -eu
+    expected="b84346650ce21a66acd488e9f2eab1ca72333ba4dd50fed79070ec182b2b3096"
+    site="$(cd / && python -c 'import magicc, os; print(os.path.dirname(magicc.__file__))')"
+    actual="$(sha256sum "${site}/data/magicc_v5.onnx" | cut -d' ' -f1)"
+    [ "${expected}" = "${actual}" ] || { echo "FATAL: model checksum mismatch in SIF"; exit 1; }
+    echo "SIF model checksum verified: ${actual}"
+
+%test
+    set -eu
+    printf '>c1\nACGTACGTACGTACGTNNNNACGTACGTACGTACGT\n>c2\nTTTTGGGGCCCCAAAATTTTGGGGCCCCAAAA\n' > /tmp/t.fasta
+    gzip -c /tmp/t.fasta > /tmp/t2.fasta.gz
+    magicc predict --input /tmp/t.fasta     --output /tmp/a.tsv --threads 1 --quiet
+    magicc predict --input /tmp/t2.fasta.gz --output /tmp/b.tsv --threads 1 --quiet
+    cut -f2,3 /tmp/a.tsv | tail -n1 > /tmp/a.v
+    cut -f2,3 /tmp/b.tsv | tail -n1 > /tmp/b.v
+    cmp /tmp/a.v /tmp/b.v
+    echo "apptainer self-test PASSED"
+
+%runscript
+    exec magicc "$@"
+
+%help
+    MAGICC 0.3.1 — genome completeness and contamination estimation.
+
+    Example:
+      apptainer run --containall --bind "$PWD":/data magicc_0.3.1.sif \
+          predict --input /data/genomes --output /data/predictions.tsv --threads 8
+
+    The frozen V5 ONNX model (SHA256 b84346650ce21a66acd488e9f2eab1ca72333ba4dd50fed
+    79070ec182b2b3096) is bundled; no network access is required at run time.

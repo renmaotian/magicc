@@ -1,0 +1,61 @@
+# =============================================================================
+# Configuration for the MAGICC headline-claim reproduction workflow
+# (WS7.4 / WS7.11; reviewer comments R1-M6, R1-M8, R1-m18)
+#
+# Every value that affects a result is here: no hidden defaults in the Snakefile.
+# =============================================================================
+
+# --- what to reproduce -------------------------------------------------------
+# The leakage-free five-set panel. Sets C and D from the submitted manuscript
+# are deliberately NOT here: their dominant genomes came from the training split
+# (100 % of Set C, 90.3 % of Set D) and their results are withdrawn.
+sets:
+  - set_A_v2
+  - set_B_v2
+  - set_C_clean
+  - set_D_clean
+  - set_E
+
+# --- model artefact (verified by checksum before anything runs) --------------
+model: models/magicc_v5.onnx
+model_sha256: b84346650ce21a66acd488e9f2eab1ca72333ba4dd50fed79070ec182b2b3096
+model_card: results/revision/model_card.json
+kmers: data/kmer_selection/selected_kmers.txt
+normalization: data/features/normalization_params.json
+
+# --- execution ---------------------------------------------------------------
+# threads_per_job is the --threads value handed to `magicc predict`.
+# Keep the product of this and Snakemake's -j at or below the cores you can use.
+threads_per_job: 4
+
+# Conda environment in which `magicc` and the analysis scripts run.
+# Empty string means "whatever is already active".
+magicc_env: magicc2
+
+# --- statistics --------------------------------------------------------------
+# R2 is the COEFFICIENT OF DETERMINATION (1 - SS_res/SS_tot), never squared
+# Pearson r -- see protocol section 4.4d.
+# Confidence intervals come from a cluster bootstrap over reference genomes,
+# clustered within set (protocol section 4.4 / WS5.4).
+bootstrap_iterations: 2000
+bootstrap_seed: 20260726
+cluster_column: dominant_accession
+
+# --- acceptance --------------------------------------------------------------
+# Recorded values the reproduction is checked against.
+reference_table: results/revision/metrics/ws5.5_table_S2_rebuilt.tsv
+reference_row: POOLED_leakage_free_5_sets
+# Absolute tolerance in percentage points for a reproduced MAE / bias to count
+# as matching the recorded value. Inference is deterministic, so this is tight;
+# it is not zero only because the recorded table was written by a different
+# script with its own float formatting.
+tolerance_pp: 0.01
+
+# --- smoke mode --------------------------------------------------------------
+# 0 = use every genome (the real reproduction, 5,000 genomes).
+# Any positive number subsamples that many genomes per set for a fast structural
+# test of the workflow. Subsampled runs are labelled as such and MUST NOT be
+# reported as a reproduction of the headline numbers.
+subsample: 0
+
+outdir: results/revision/reproducibility/workflow

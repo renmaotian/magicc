@@ -1,0 +1,185 @@
+# =============================================================================
+# MAGICC — reproduction of the headline benchmark claims        (WS7.4 / WS7.11)
+#
+# Addresses R1-M6 (workflow manager), R1-M8 (reproducibility artifacts) and
+# R1-m18 (one-command end-to-end reproduction).
+#
+# One command:
+#     bash workflow/run_reproduction.sh
+#
+# or directly:
+#     snakemake -s workflow/Snakefile --configfile workflow/config/config.yaml \
+#               -j 1 --config threads_per_job=4
+#
+# The DAG is:
+#     verify_inputs                      checksum the frozen model and resources
+#         -> predict (one job per set)   magicc predict on the set's FASTA dir
+#         -> evaluate (one job per set)  MAE / bias / R2 with cluster bootstrap
+#         -> pool                        pooled leakage-free five-set statistics
+#         -> compare                     check against the recorded values
+#         -> report                      HEADLINE_REPRODUCTION.md
+#
+# Every rule declares its inputs, outputs, threads and the exact command run.
+# Seeds live in workflow/config/config.yaml, never in the code.
+# =============================================================================
+
+import os
+from pathlib import Path
+
+configfile: "workflow/config/config.yaml"
+
+REPO    = Path(workflow.basedir).parent.resolve()
+OUT     = REPO / config["outdir"]
+SETS    = config["sets"]
+ENVNAME = config.get("magicc_env", "").strip()
+
+
+def in_env(cmd: str) -> str:
+    """Run *cmd* inside the configured conda env, or as-is if none is set."""
+    if not ENVNAME:
+        return cmd
+    return f"conda run -n {ENVNAME} --no-capture-output {cmd}"
+
+
+MAGICC = in_env("magicc")
+PY     = in_env("python")
+
+
+rule all:
+    input:
+        OUT / "HEADLINE_REPRODUCTION.md",
+        OUT / "reproduction_summary.json",
+
+
+# --------------------------------------------------------------------------
+# 1. Verify the frozen artefacts before spending any compute.
+# --------------------------------------------------------------------------
+rule verify_inputs:
+    input:
+        model  = REPO / config["model"],
+        card   = REPO / config["model_card"],
+        kmers  = REPO / config["kmers"],
+        norm   = REPO / config["normalization"],
+    output:
+        OUT / "checks" / "inputs_verified.json",
+    params:
+        sha    = config["model_sha256"],
+        script = REPO / "workflow" / "scripts" / "verify_inputs.py",
+    threads: 1
+    shell:
+        PY + " {params.script}"
+        " --model {input.model} --model-card {input.card}"
+        " --kmers {input.kmers} --normalization {input.norm}"
+        " --expected-sha256 {params.sha} --output {output}"
+
+
+# --------------------------------------------------------------------------
+# 2. Predictions. One job per benchmark set, so a failure is localised and a
+#    rerun resumes rather than restarting.
+# --------------------------------------------------------------------------
+rule predict:
+    input:
+        verified = OUT / "checks" / "inputs_verified.json",
+        fasta    = lambda wc: REPO / "data" / "benchmarks" / wc.setname / "fasta",
+        model    = REPO / config["model"],
+        kmers    = REPO / config["kmers"],
+        norm     = REPO / config["normalization"],
+    output:
+        tsv = OUT / "predictions" / "{setname}.tsv",
+    log:
+        OUT / "logs" / "predict_{setname}.log",
+    threads: config["threads_per_job"]
+    params:
+        subsample = config["subsample"],
+        helper    = REPO / "workflow" / "scripts" / "make_input_list.py",
+        listfile  = lambda wc: OUT / "predictions" / f"{wc.setname}.inputs.txt",
+    shell:
+        # A deterministic, sorted input list is built first so that the set of
+        # genomes scored is explicit and identical on every run (and so that
+        # `subsample` is reproducible rather than filesystem-order dependent).
+        PY + " {params.helper} --fasta-dir {input.fasta}"
+        " --subsample {params.subsample} --output {params.listfile} && "
+        + MAGICC + " predict"
+        " --input-list {params.listfile}"
+        " --output {output.tsv}"
+        " --threads {threads}"
+        " --model {input.model}"
+        " --normalization {input.norm}"
+        " --kmers {input.kmers}"
+        " > {log} 2>&1"
+
+
+# --------------------------------------------------------------------------
+# 3. Per-set evaluation against the ground-truth metadata.
+# --------------------------------------------------------------------------
+rule evaluate:
+    input:
+        pred = OUT / "predictions" / "{setname}.tsv",
+        meta = lambda wc: REPO / "data" / "benchmarks" / wc.setname / "metadata.tsv",
+    output:
+        json = OUT / "metrics" / "{setname}.json",
+    threads: 1
+    params:
+        script  = REPO / "workflow" / "scripts" / "evaluate.py",
+        iters   = config["bootstrap_iterations"],
+        seed    = config["bootstrap_seed"],
+        cluster = config["cluster_column"],
+    shell:
+        PY + " {params.script}"
+        " --predictions {input.pred} --metadata {input.meta}"
+        " --set-name {wildcards.setname}"
+        " --bootstrap-iterations {params.iters} --bootstrap-seed {params.seed}"
+        " --cluster-column {params.cluster} --output {output.json}"
+
+
+# --------------------------------------------------------------------------
+# 4. Pool the five sets. Clusters are (set, dominant_accession) pairs, matching
+#    the WS5.4 convention, so a reference genome reused across sets is not
+#    treated as one cluster spanning sets.
+# --------------------------------------------------------------------------
+rule pool:
+    input:
+        preds = expand(str(OUT / "predictions" / "{setname}.tsv"), setname=SETS),
+        metas = [str(REPO / "data" / "benchmarks" / s / "metadata.tsv") for s in SETS],
+    output:
+        json = OUT / "metrics" / "pooled_leakage_free.json",
+    threads: 1
+    params:
+        script  = REPO / "workflow" / "scripts" / "evaluate.py",
+        iters   = config["bootstrap_iterations"],
+        seed    = config["bootstrap_seed"],
+        cluster = config["cluster_column"],
+        sets    = " ".join(SETS),
+    shell:
+        PY + " {params.script}"
+        " --predictions {input.preds} --metadata {input.metas}"
+        " --set-name POOLED_leakage_free_5_sets --set-labels {params.sets}"
+        " --bootstrap-iterations {params.iters} --bootstrap-seed {params.seed}"
+        " --cluster-column {params.cluster} --output {output.json}"
+
+
+# --------------------------------------------------------------------------
+# 5. Compare with the recorded values and write the report.
+# --------------------------------------------------------------------------
+rule report:
+    input:
+        pooled   = OUT / "metrics" / "pooled_leakage_free.json",
+        per_set  = expand(str(OUT / "metrics" / "{setname}.json"), setname=SETS),
+        verified = OUT / "checks" / "inputs_verified.json",
+        ref      = REPO / config["reference_table"],
+    output:
+        md   = OUT / "HEADLINE_REPRODUCTION.md",
+        json = OUT / "reproduction_summary.json",
+    threads: 1
+    params:
+        script    = REPO / "workflow" / "scripts" / "compare_and_report.py",
+        ref_row   = config["reference_row"],
+        tol       = config["tolerance_pp"],
+        subsample = config["subsample"],
+    shell:
+        PY + " {params.script}"
+        " --pooled {input.pooled} --per-set {input.per_set}"
+        " --verified {input.verified}"
+        " --reference-table {input.ref} --reference-row {params.ref_row}"
+        " --tolerance-pp {params.tol} --subsample {params.subsample}"
+        " --output-md {output.md} --output-json {output.json}"

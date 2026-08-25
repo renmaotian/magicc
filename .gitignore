@@ -18,8 +18,8 @@ __pycache__/
 *.pyc
 *.egg-info/
 .pytest_cache/
-dist/
-build/
+/dist/
+/build/
 
 # --- Manuscript, reviewer and private material: NEVER publish ----------------
 manuscript/
@@ -66,9 +66,9 @@ results/revision/reproducibility/*
 
 # --- Analysis code, third-party tools, logs, run state ------------------------
 # The analysis scripts are released separately (see Code availability).
-scripts/
-tools/
-logs/
+/scripts/
+/tools/
+/logs/
 .snakemake/
 
 # --- Large reference inputs to the training pipeline --------------------------

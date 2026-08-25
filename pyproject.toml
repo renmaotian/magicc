@@ -59,3 +59,10 @@ magicc = [
     "data/normalization_params.json",
     "data/selected_kmers.txt",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = [
+    "slow: end-to-end tests that load the ONNX model and run real genomes",
+]

@@ -67,6 +67,32 @@ def test_model_url_is_the_release_asset_for_this_version():
     )
 
 
+def test_cli_version_matches_the_package():
+    assert cli.__version__ == magicc.__version__
+
+
+def test_fallback_version_literal_cannot_drift():
+    """
+    ``_FALLBACK_VERSION`` is the last resort when ``import magicc`` is shadowed
+    by a leftover empty ``site-packages/magicc/`` directory (defect D5). It is a
+    literal, so this test is what keeps it honest.
+    """
+    assert cli._FALLBACK_VERSION == magicc.__version__
+
+
+def test_version_is_readable_from_the_init_file_beside_cli():
+    """The fallback path 0.3.2 lacked: resolve the version without importing."""
+    init = Path(cli.__file__).resolve().parent / '__init__.py'
+    assert cli._version_from_init(init) == magicc.__version__
+    assert cli._package_version() == magicc.__version__
+
+
+def test_version_from_init_handles_absence(tmp_path):
+    (tmp_path / '__init__.py').write_text('"""no version here"""\n')
+    assert cli._version_from_init(tmp_path / '__init__.py') is None
+    assert cli._version_from_init(tmp_path / 'does-not-exist.py') is None
+
+
 def test_model_url_is_not_a_mutable_branch_ref():
     """The 0.3.1 defect, pinned so it cannot come back."""
     assert '/raw/' not in cli.MODEL_URL

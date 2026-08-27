@@ -4,6 +4,45 @@ All notable changes to MAGICC are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.3] — 2026-08-27
+
+**Repairs a regression that 0.3.2 introduced, found by 0.3.2's own acceptance
+test within the hour and fixed before anything else depended on it.**
+0.3.3 is otherwise identical to 0.3.2; use it in preference to 0.3.2.
+
+### Fixed
+
+- **0.3.2 refused to start in an install whose `magicc` package was shadowed
+  by a leftover directory.** To build the release-asset URL, 0.3.2 introduced
+  `from magicc import __version__` at the top of `magicc/cli.py`. If an empty
+  `site-packages/magicc/` directory survives an uninstall — which it does
+  whenever Numba has written its `__pycache__/*.nbc` cache there, i.e. after
+  any prediction, and is then followed by `pip install -e .` — Python treats
+  `magicc` as a *namespace* package that shadows the real one (defect D5).
+  In that state the import raises and **0.3.2 exits with
+  `ImportError: cannot import name '__version__' from 'magicc' (unknown
+  location)`** before doing anything. 0.3.1 and earlier kept working, so this
+  was a regression, and the message told a user nothing actionable.
+
+  0.3.3 resolves the version defensively: the normal import first, then by
+  reading `__version__` out of the `__init__.py` sitting **beside `cli.py`**
+  (always the real one, whatever `import magicc` resolves to), then a literal
+  that `tests/test_model_integrity.py` pins to `magicc.__version__` so it
+  cannot drift. When a fallback is used, MAGICC prints a warning naming the
+  likely cause and the repair (`pip uninstall magicc`, delete the leftover
+  `site-packages/magicc/`, reinstall) and **carries on** rather than dying.
+
+  The model URL is still built from the resolved version, so it still points at
+  the immutable release asset for the running version.
+
+- 4 further regression tests (suite: **96**).
+
+### Notes
+
+- `0.3.2` remains on PyPI and as a GitHub release; it is correct for every
+  normal install and its release asset is the same file. It is superseded
+  rather than yanked, and 0.3.3 supersedes it for all purposes.
+
 ## [0.3.2] — 2026-08-27
 
 **A reproducibility defect in how the model was obtained, stated plainly.**
@@ -62,7 +101,7 @@ model is *fetched and validated* has changed.
   form (asserting it is a release asset and not a branch ref), the digest
   helpers, cached-model verification, corrupted-cache rejection, download and
   verification over `file://`, rejection of a wrong artefact with nothing left
-  behind, and the offline error's contents. The suite is now **92 tests**.
+  behind, and the offline error's contents. The suite grows to **92 tests**.
 
 ### Changed
 
@@ -185,6 +224,7 @@ which was present in the 0.3.0 distribution.
 
 - First public release (model V3).
 
+[0.3.3]: https://github.com/renmaotian/magicc/releases/tag/v0.3.3
 [0.3.2]: https://github.com/renmaotian/magicc/releases/tag/v0.3.2
 [0.3.1]: https://github.com/renmaotian/magicc/releases/tag/v0.3.1
 [0.3.0]: https://pypi.org/project/magicc/0.3.0/

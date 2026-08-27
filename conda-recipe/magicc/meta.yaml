@@ -1,6 +1,6 @@
 {% set name = "magicc" %}
-{% set version = "0.3.2" %}
-{% set sha256 = "1c116204df801c27dac7dbdfc94dd525b84fc11a82ba003ccff15ae5d0e122b1" %}
+{% set version = "0.3.3" %}
+{% set sha256 = "55f3f6b14fccdb9e574abc19b098fbe6acd46d587641967c1e1b38f7e164ad7c" %}
 
 package:
   name: {{ name|lower }}

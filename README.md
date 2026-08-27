@@ -39,7 +39,7 @@ order:
 and only if none of those exists does it download
 
 ```
-https://github.com/renmaotian/magicc/releases/download/v0.3.2/magicc_v5.onnx
+https://github.com/renmaotian/magicc/releases/download/v0.3.3/magicc_v5.onnx
 ```
 
 — the **immutable release asset of the installed version**, never a branch ref.
@@ -70,13 +70,13 @@ and the exact model is guaranteed by checksum.
 
 ```bash
 # Docker
-docker build -f docker/Dockerfile -t magicc:0.3.2 .
-docker run --rm -v "$PWD":/data magicc:0.3.2 \
+docker build -f docker/Dockerfile -t magicc:0.3.3 .
+docker run --rm -v "$PWD":/data magicc:0.3.3 \
     predict --input /data/genomes --output /data/predictions.tsv --threads 8
 
 # Apptainer / Singularity (HPC)
-apptainer build magicc_0.3.2.sif docker-daemon://magicc:0.3.2
-apptainer run --containall --bind "$PWD":/data magicc_0.3.2.sif \
+apptainer build magicc_0.3.3.sif docker-daemon://magicc:0.3.3
+apptainer run --containall --bind "$PWD":/data magicc_0.3.3.sif \
     predict --input /data/genomes --output /data/predictions.tsv --threads 8
 ```
 
@@ -182,7 +182,7 @@ Optional:
                     Also matches the .gz form; use "auto" for any FASTA extension
   --model           Path to ONNX model file. Default: the frozen V5 model,
                     resolved from the package / checkout / ~/.magicc and
-                    downloaded from the v0.3.2 release asset if absent; its
+                    downloaded from the v0.3.3 release asset if absent; its
                     SHA256 is verified on every run (see "Where the model
                     comes from" above)
   --quiet, -q       Suppress progress output
@@ -210,7 +210,7 @@ bash workflow/run_reproduction.sh
 # Fast structural check of the workflow (25 genomes per set)
 bash workflow/run_reproduction.sh --smoke
 
-# Test suite (92 tests)
+# Test suite (96 tests)
 python -m pytest tests/ -q
 ```
 

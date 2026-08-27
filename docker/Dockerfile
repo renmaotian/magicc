@@ -18,10 +18,10 @@
 #     an image whose model was altered after the build would refuse to run
 #
 # Build (from the repository root):
-#   docker build -f docker/Dockerfile -t magicc:0.3.2 .
+#   docker build -f docker/Dockerfile -t magicc:0.3.3 .
 #
 # Run:
-#   docker run --rm -v "$PWD":/data magicc:0.3.2 \
+#   docker run --rm -v "$PWD":/data magicc:0.3.3 \
 #       predict --input /data/genomes --output /data/predictions.tsv --threads 8
 # =============================================================================
 
@@ -31,7 +31,7 @@ FROM python:3.11.9-slim-bookworm@sha256:8fb099199b9f2d70342674bd9dbccd3ed03a258f
 
 LABEL org.opencontainers.image.title="MAGICC" \
       org.opencontainers.image.description="Genome completeness and contamination estimation from core-gene k-mer profiles" \
-      org.opencontainers.image.version="0.3.2" \
+      org.opencontainers.image.version="0.3.3" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.source="https://github.com/renmaotian/magicc" \
       org.magicc.model.version="V5" \

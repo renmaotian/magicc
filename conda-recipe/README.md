@@ -22,9 +22,9 @@ The recipe builds the **PyPI sdist**.
 | | |
 |---|---|
 | PyPI package name | **`magicc`** |
-| Version | 0.3.2 |
-| URL | `https://pypi.io/packages/source/m/magicc/magicc-0.3.2.tar.gz` |
-| SHA256 | `1c116204df801c27dac7dbdfc94dd525b84fc11a82ba003ccff15ae5d0e122b1` |
+| Version | 0.3.3 |
+| URL | `https://pypi.io/packages/source/m/magicc/magicc-0.3.3.tar.gz` |
+| SHA256 | `55f3f6b14fccdb9e574abc19b098fbe6acd46d587641967c1e1b38f7e164ad7c` |
 
 > **The PyPI distribution is named `magicc`.** There is no `magicc-genome`
 > package — `https://pypi.org/pypi/magicc-genome/json` returns **404**. The
@@ -56,7 +56,7 @@ belongs in a conda package. On first prediction the CLI downloads it to
 
 Since **0.3.2** that download comes from the **immutable release asset of the
 installed version**
-(`https://github.com/renmaotian/magicc/releases/download/v0.3.2/magicc_v5.onnx`),
+(`https://github.com/renmaotian/magicc/releases/download/v0.3.3/magicc_v5.onnx`),
 not from a mutable branch ref, and its SHA256 is verified against
 `b84346650ce21a66acd488e9f2eab1ca72333ba4dd50fed79070ec182b2b3096` before use
 and on every subsequent run. An offline user can place that file at the cache
@@ -72,9 +72,9 @@ the conda package.
 
 ```bash
 # 1. checksum verification against the published sdist
-curl -sSL -o /tmp/magicc-0.3.2.tar.gz \
-    https://pypi.io/packages/source/m/magicc/magicc-0.3.2.tar.gz
-sha256sum /tmp/magicc-0.3.2.tar.gz   # must equal the SHA256 above
+curl -sSL -o /tmp/magicc-0.3.3.tar.gz \
+    https://pypi.io/packages/source/m/magicc/magicc-0.3.3.tar.gz
+sha256sum /tmp/magicc-0.3.3.tar.gz   # must equal the SHA256 above
 
 # 2. recipe render + lint
 conda render conda-recipe/magicc

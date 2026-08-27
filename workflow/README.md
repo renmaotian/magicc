@@ -113,7 +113,7 @@ snakemake -s workflow/Snakefile --configfile workflow/config/config.yaml \
           -j 1 --use-conda --config magicc_env=""
 
 # option C -- container (most hermetic; model baked in and checksummed)
-docker run --rm --network none -v "$PWD":/data magicc:0.3.2 \
+docker run --rm --network none -v "$PWD":/data magicc:0.3.3 \
     predict --input /data/data/benchmarks/set_E/fasta --output /data/pred.tsv
 ```
 

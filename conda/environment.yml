@@ -6,7 +6,7 @@
 #
 #   mamba env create -f conda/environment.yml
 #   conda activate magicc
-#   pip install --no-deps .          # or: pip install magicc==0.3.2
+#   pip install --no-deps .          # or: pip install magicc==0.3.3
 #
 # NOTE: the PyPI distribution is named `magicc`. There is no `magicc-genome`
 # package; that name does not exist on PyPI.

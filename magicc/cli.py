@@ -35,10 +35,73 @@ from pathlib import Path
 from typing import List, Tuple, Optional, Dict, Any
 from multiprocessing import Pool, cpu_count
 
-try:  # normal import path (installed package, `python -m magicc`, `magicc`)
-    from magicc import __version__
-except ImportError:  # pragma: no cover - `python magicc/cli.py` puts magicc/ on sys.path
-    from . import __version__  # type: ignore[no-redef]
+# ---------------------------------------------------------------------------
+# The package version, resolved defensively
+# ---------------------------------------------------------------------------
+# The model download URL is built from this version, so it must be knowable
+# even in a partly-broken install.  In particular, an empty
+# ``site-packages/magicc/`` directory left behind by an uninstall (typically
+# holding only Numba's ``__pycache__``) makes Python treat ``magicc`` as a
+# *namespace* package that shadows the real one -- defect D5.  In that state
+# ``from magicc import __version__`` raises, even though this very module was
+# loaded successfully from the real package directory.  0.3.2 crashed there;
+# every version before and after resolves the version another way and keeps
+# running, while saying clearly that the install needs repair.
+
+#: Last-resort version literal.  ``tests/test_model_integrity.py`` asserts that
+#: it equals ``magicc.__version__``, so the two cannot drift apart unnoticed.
+_FALLBACK_VERSION = "0.3.3"
+
+
+def _version_from_init(init_path) -> Optional[str]:
+    """Parse ``__version__`` out of an ``__init__.py`` without importing it."""
+    try:
+        with open(init_path, 'r', encoding='utf-8') as fh:
+            for line in fh:
+                stripped = line.strip()
+                if stripped.startswith('__version__'):
+                    _, _, rhs = stripped.partition('=')
+                    rhs = rhs.strip()
+                    if len(rhs) >= 2 and rhs[0] in '\'"' and rhs[-1] == rhs[0]:
+                        return rhs[1:-1]
+    except OSError:
+        pass
+    return None
+
+
+def _package_version() -> str:
+    """
+    Return the MAGICC version, tolerating a shadowed or partial install.
+
+    Order: the normal import; then the ``__init__.py`` sitting beside this
+    file (always the real one, whatever ``import magicc`` resolves to); then
+    the literal above.
+    """
+    try:
+        from magicc import __version__ as imported
+        return imported
+    except Exception:                                  # noqa: BLE001
+        pass
+    beside = _version_from_init(Path(__file__).resolve().parent / '__init__.py')
+    if beside is not None:
+        sys.stderr.write(
+            "MAGICC warning: 'import magicc' did not expose __version__, which "
+            "usually means an empty site-packages/magicc/ directory is shadowing "
+            "the real package. Continuing with version {} read from {}. To "
+            "repair: pip uninstall magicc, delete any leftover "
+            "site-packages/magicc/ directory, then reinstall.\n".format(
+                beside, Path(__file__).resolve().parent / '__init__.py')
+        )
+        return beside
+    sys.stderr.write(
+        "MAGICC warning: could not determine the installed version; assuming "
+        "{}. The install appears to be damaged -- reinstall MAGICC.\n".format(
+            _FALLBACK_VERSION)
+    )
+    return _FALLBACK_VERSION
+
+
+__version__ = _package_version()
 
 # ---------------------------------------------------------------------------
 # Resolve default resource paths -- check package data first, then project layout

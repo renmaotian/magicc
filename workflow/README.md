@@ -10,8 +10,8 @@ Before running it you need, laid out under the repository root:
 
 | Path | What | Where to get it |
 |---|---|---|
-| `data/benchmarks/{set_A_v2,set_B_v2,set_C_clean,set_D_clean,set_E}/fasta/` | 5,000 benchmark assemblies | figshare deposition (see the paper's Data availability) |
-| `data/benchmarks/<set>/metadata.tsv` | per-sample ground truth | figshare, and mirrored in the [data repository](https://github.com/renmaotian/magicc-data) |
+| `data/benchmarks/{set_A_v2,set_B_v2,set_C_clean,set_D_clean,set_E}/fasta/` | 5,000 benchmark assemblies | [`magicc-data`](https://github.com/renmaotian/magicc-data) release [`v1.0.0`](https://github.com/renmaotian/magicc-data/releases/tag/v1.0.0); fetch with `download_benchmarks.sh` |
+| `data/benchmarks/<set>/metadata.tsv` | per-sample ground truth | in the [data repository](https://github.com/renmaotian/magicc-data), alongside the assemblies |
 
 Everything else the workflow needs — the frozen model, the 9,249-k-mer list, the
 normalisation parameters, the model card and the recorded metrics table it
@@ -44,7 +44,7 @@ explicitly *not* a reproduction of the headline numbers.
 | | |
 |---|---|
 | **Covered** | The MAGICC V5 arm of the headline benchmark: artefact verification → prediction on `set_A_v2`, `set_B_v2`, `set_C_clean`, `set_D_clean`, `set_E` → per-set MAE/bias/R²/RMSE → pooled statistics with a cluster bootstrap over reference genomes → comparison with `results/revision/metrics/ws5.5_table_S2_rebuilt.tsv`. |
-| **Not covered** | Competitor tools (CheckM2, CoCoPyE, DeepCheck, GUNC), which need separate conda environments and reference databases totalling >20 GB; the GPU retraining; and the real-data workstreams. Their predictions are released as result files (figshare) and the metrics framework that recomputes every published statistic from them ships with the analysis code, not with this package. |
+| **Not covered** | Competitor tools (CheckM2, CoCoPyE, DeepCheck, GUNC), which need separate conda environments and reference databases totalling >20 GB; the GPU retraining; and the real-data workstreams. Their predictions are released as result files in the [data repository](https://github.com/renmaotian/magicc-data) and the metrics framework that recomputes every published statistic from them ships with the analysis code, not with this package. |
 | **Deliberately excluded** | The submitted manuscript's Sets C and D. Their dominant genomes came from the training split (100 % of Set C, 90.3 % of Set D); those results are withdrawn, not reproduced. |
 
 ## Layout

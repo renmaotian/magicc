@@ -248,7 +248,7 @@ specifications. It is deliberately not the research workspace.
 |---|---|
 | Package, model, tests, workflow, containers, conda | here |
 | Benchmark accession lists, split files, per-sample metadata, SHA256 manifests, the leakage audit, CAMI II identifiers and truth tables | [`renmaotian/magicc-data`](https://github.com/renmaotian/magicc-data) |
-| Benchmark genome assemblies and the full per-genome result files | figshare (see the paper's Data availability statement) |
+| Benchmark genome assemblies and the full per-genome result files | [`magicc-data`](https://github.com/renmaotian/magicc-data), release [`v1.0.0`](https://github.com/renmaotian/magicc-data/releases/tag/v1.0.0) |
 | Analysis and training scripts, figure code | released with the paper (see its Code availability statement) |
 
 A few small files under `data/` and `results/` **are** tracked here, because a

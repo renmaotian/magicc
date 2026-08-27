@@ -10,15 +10,15 @@
 # BUILD (two supported routes)
 # ---------------------------------------------------------------------------
 # (a) From a locally built Docker image (route used for the released SIF):
-#       docker build -f docker/Dockerfile -t magicc:0.3.1 .
-#       apptainer build containers/magicc_0.3.1.sif docker-daemon://magicc:0.3.1
+#       docker build -f docker/Dockerfile -t magicc:0.3.2 .
+#       apptainer build containers/magicc_0.3.2.sif docker-daemon://magicc:0.3.2
 #
 #     This route needs NO root and NO user namespaces.
 #
 # (b) From this definition file directly (requires root or --fakeroot):
-#       sudo apptainer build containers/magicc_0.3.1.sif containers/magicc.def
+#       sudo apptainer build containers/magicc_0.3.2.sif containers/magicc.def
 #     or, if unprivileged user namespaces are permitted on the host:
-#       apptainer build --fakeroot containers/magicc_0.3.1.sif containers/magicc.def
+#       apptainer build --fakeroot containers/magicc_0.3.2.sif containers/magicc.def
 #
 # ---------------------------------------------------------------------------
 # RUN
@@ -26,7 +26,7 @@
 #   apptainer run --containall \
 #       --bind /path/to/genomes:/data \
 #       --env NUMBA_CACHE_DIR=/tmp/numba_cache \
-#       containers/magicc_0.3.1.sif \
+#       containers/magicc_0.3.2.sif \
 #       predict --input /data --output /data/predictions.tsv --threads 8
 #
 # Running an Apptainer container requires either a setuid-root `starter-suid`
@@ -36,11 +36,11 @@
 # =============================================================================
 
 Bootstrap: docker-daemon
-From: magicc:0.3.1
+From: magicc:0.3.2
 
 %labels
     org.opencontainers.image.title        MAGICC
-    org.opencontainers.image.version      0.3.1
+    org.opencontainers.image.version      0.3.2
     org.opencontainers.image.licenses     MIT
     org.opencontainers.image.source       https://github.com/renmaotian/magicc
     org.magicc.model.version              V5
@@ -75,10 +75,10 @@ From: magicc:0.3.1
     exec magicc "$@"
 
 %help
-    MAGICC 0.3.1 — genome completeness and contamination estimation.
+    MAGICC 0.3.2 — genome completeness and contamination estimation.
 
     Example:
-      apptainer run --containall --bind "$PWD":/data magicc_0.3.1.sif \
+      apptainer run --containall --bind "$PWD":/data magicc_0.3.2.sif \
           predict --input /data/genomes --output /data/predictions.tsv --threads 8
 
     The frozen V5 ONNX model (SHA256 b84346650ce21a66acd488e9f2eab1ca72333ba4dd50fed

@@ -11,14 +11,17 @@
 #   * the V5 ONNX model is BUNDLED in the image and its SHA256 is verified at
 #     build time against results/revision/model_card.json, so the image can
 #     never silently ship a different model
-#   * no network access is required at run time (the CLI's model auto-download
-#     path is never reached because MAGICC_MODEL points at the bundled file)
+#   * no network access is required at run time: the frozen model is copied
+#     into the *installed package's* data/ directory, which is the first
+#     location the CLI looks in, so its download path is never reached.  Since
+#     0.3.2 the CLI additionally verifies that file's SHA256 on every run, so
+#     an image whose model was altered after the build would refuse to run
 #
 # Build (from the repository root):
-#   docker build -f docker/Dockerfile -t magicc:0.3.1 .
+#   docker build -f docker/Dockerfile -t magicc:0.3.2 .
 #
 # Run:
-#   docker run --rm -v "$PWD":/data magicc:0.3.1 \
+#   docker run --rm -v "$PWD":/data magicc:0.3.2 \
 #       predict --input /data/genomes --output /data/predictions.tsv --threads 8
 # =============================================================================
 
@@ -28,7 +31,7 @@ FROM python:3.11.9-slim-bookworm@sha256:8fb099199b9f2d70342674bd9dbccd3ed03a258f
 
 LABEL org.opencontainers.image.title="MAGICC" \
       org.opencontainers.image.description="Genome completeness and contamination estimation from core-gene k-mer profiles" \
-      org.opencontainers.image.version="0.3.1" \
+      org.opencontainers.image.version="0.3.2" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.source="https://github.com/renmaotian/magicc" \
       org.magicc.model.version="V5" \

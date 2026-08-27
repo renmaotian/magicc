@@ -24,6 +24,45 @@ pip install -e .
 
 **Note**: Git LFS is required to clone the repository (the ONNX model is ~180 MB).
 
+### Where the model comes from, and offline use
+
+The 162 MB V5 ONNX model is **not inside the PyPI wheel or sdist** — it exceeds
+PyPI's per-file limit. `pip install magicc` therefore needs network access
+**once**, on the first run, to fetch it. MAGICC looks for the model in this
+order:
+
+1. the installed package's own `data/` directory (this is where the container
+   puts it, which is why the container never downloads anything);
+2. `models/magicc_v5.onnx` relative to the package (a source checkout);
+3. `~/.magicc/magicc_v5.onnx` — the run-time cache;
+
+and only if none of those exists does it download
+
+```
+https://github.com/renmaotian/magicc/releases/download/v0.3.2/magicc_v5.onnx
+```
+
+— the **immutable release asset of the installed version**, never a branch ref.
+Whichever of the four sources supplies the file, **its SHA256 must equal
+`b84346650ce21a66acd488e9f2eab1ca72333ba4dd50fed79070ec182b2b3096` or MAGICC
+refuses to run**, naming the expected and observed digests. The check runs on
+every invocation, so a corrupted or altered cache is caught even long after it
+was written.
+
+**Offline / air-gapped hosts.** Fetch `magicc_v5.onnx` on a connected machine
+(from the release-asset URL above, or from a Git-LFS clone of this repository),
+copy it to
+
+```
+~/.magicc/magicc_v5.onnx
+```
+
+and run normally — no network is touched, and the hand-placed copy is checksum
+verified exactly like a downloaded one. `--model /path/to/magicc_v5.onnx` also
+works and is deliberately *not* checksum-verified, so that alternative models
+can be evaluated on purpose. The container route below avoids the question
+entirely.
+
 ### Container (recommended for reproducible or offline use)
 
 The container bundles the frozen V5 model, so nothing is downloaded at run time
@@ -31,13 +70,13 @@ and the exact model is guaranteed by checksum.
 
 ```bash
 # Docker
-docker build -f docker/Dockerfile -t magicc:0.3.1 .
-docker run --rm -v "$PWD":/data magicc:0.3.1 \
+docker build -f docker/Dockerfile -t magicc:0.3.2 .
+docker run --rm -v "$PWD":/data magicc:0.3.2 \
     predict --input /data/genomes --output /data/predictions.tsv --threads 8
 
 # Apptainer / Singularity (HPC)
-apptainer build magicc_0.3.1.sif docker-daemon://magicc:0.3.1
-apptainer run --containall --bind "$PWD":/data magicc_0.3.1.sif \
+apptainer build magicc_0.3.2.sif docker-daemon://magicc:0.3.2
+apptainer run --containall --bind "$PWD":/data magicc_0.3.2.sif \
     predict --input /data/genomes --output /data/predictions.tsv --threads 8
 ```
 
@@ -141,7 +180,11 @@ Optional:
   --batch-size      Batch size for ONNX inference (default: 64)
   --extension, -x   Extension filter for directory input (default: .fasta).
                     Also matches the .gz form; use "auto" for any FASTA extension
-  --model           Path to ONNX model file (auto-downloads if not found)
+  --model           Path to ONNX model file. Default: the frozen V5 model,
+                    resolved from the package / checkout / ~/.magicc and
+                    downloaded from the v0.3.2 release asset if absent; its
+                    SHA256 is verified on every run (see "Where the model
+                    comes from" above)
   --quiet, -q       Suppress progress output
   --verbose, -v     Verbose debug output
 ```
@@ -167,7 +210,7 @@ bash workflow/run_reproduction.sh
 # Fast structural check of the workflow (25 genomes per set)
 bash workflow/run_reproduction.sh --smoke
 
-# Test suite (77 tests)
+# Test suite (92 tests)
 python -m pytest tests/ -q
 ```
 

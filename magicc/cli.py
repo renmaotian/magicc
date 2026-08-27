@@ -23,6 +23,7 @@ Usage:
 
 import argparse
 import gzip
+import hashlib
 import logging
 import os
 import sys
@@ -34,6 +35,11 @@ from pathlib import Path
 from typing import List, Tuple, Optional, Dict, Any
 from multiprocessing import Pool, cpu_count
 
+try:  # normal import path (installed package, `python -m magicc`, `magicc`)
+    from magicc import __version__
+except ImportError:  # pragma: no cover - `python magicc/cli.py` puts magicc/ on sys.path
+    from . import __version__  # type: ignore[no-redef]
+
 # ---------------------------------------------------------------------------
 # Resolve default resource paths -- check package data first, then project layout
 # ---------------------------------------------------------------------------
@@ -41,8 +47,147 @@ _PACKAGE_DIR = Path(__file__).resolve().parent          # magicc/
 _PROJECT_DIR = _PACKAGE_DIR.parent                       # magicc2/ (dev layout)
 _USER_DATA_DIR = Path.home() / '.magicc'
 
-MODEL_URL = "https://github.com/renmaotian/magicc/raw/main/models/magicc_v5.onnx"
 MODEL_FILENAME = "magicc_v5.onnx"
+
+#: SHA256 of the frozen released model (V5).  **Single source of truth** for
+#: model integrity: checked after every download *and* before every load of an
+#: already-present copy, so a corrupted or tampered cache is caught on every
+#: run rather than only on first fetch.
+MODEL_SHA256 = "b84346650ce21a66acd488e9f2eab1ca72333ba4dd50fed79070ec182b2b3096"
+
+#: Size of that artefact, in bytes.  Used only for the download notice.
+MODEL_BYTES = 169_658_949
+
+#: Where the model is fetched from when it is not already on disk.
+#:
+#: This is the **immutable release asset of the package's own version**.  A
+#: GitHub release asset is frozen once published; the previous
+#: ``.../raw/main/models/magicc_v5.onnx`` form pointed at a *mutable branch*,
+#: so any later commit touching the model would silently change what an
+#: already-released version of MAGICC downloaded.  Pinning to ``v{version}``
+#: makes an install reproducible against exactly one artefact, and the SHA256
+#: check below makes that guarantee verifiable rather than merely intended.
+MODEL_URL = (
+    "https://github.com/renmaotian/magicc/releases/download/"
+    "v{version}/{filename}".format(version=__version__, filename=MODEL_FILENAME)
+)
+
+#: Cache location for a model fetched at run time, and the place an offline
+#: user should put the file by hand.
+MODEL_CACHE_PATH = _USER_DATA_DIR / MODEL_FILENAME
+
+
+class ModelIntegrityError(RuntimeError):
+    """Raised when an ONNX model's SHA256 does not match the released value."""
+
+
+def _sha256_file(path, chunk_bytes: int = 1 << 20) -> str:
+    """Return the hex SHA256 of *path*, read in chunks (the model is ~162 MiB)."""
+    digest = hashlib.sha256()
+    with open(path, 'rb') as fh:
+        for chunk in iter(lambda: fh.read(chunk_bytes), b''):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _verify_model(path: Path, origin: str) -> None:
+    """
+    Fail loudly unless *path* hashes to :data:`MODEL_SHA256`.
+
+    *origin* is a short phrase describing where the file came from, used in the
+    error message ("the cached model", "the downloaded model").
+    """
+    observed = _sha256_file(path)
+    if observed == MODEL_SHA256:
+        return
+    raise ModelIntegrityError(
+        "MAGICC model checksum mismatch -- refusing to run.\n"
+        "  file      : {path}\n"
+        "  origin    : {origin}\n"
+        "  expected  : {expected}\n"
+        "  observed  : {observed}\n"
+        "  size      : {size:,} B (expected {want:,} B)\n"
+        "The released V5 model is the only model these predictions are "
+        "calibrated for, so MAGICC will not use a file that does not match. "
+        "Delete the file above and re-run to fetch a fresh copy from "
+        "{url}, or pass a verified model explicitly with --model.".format(
+            path=path, origin=origin, expected=MODEL_SHA256, observed=observed,
+            size=os.path.getsize(path), want=MODEL_BYTES, url=MODEL_URL,
+        )
+    )
+
+
+def _offline_help(reason: str) -> str:
+    """Actionable message for a failed model download."""
+    return (
+        "Could not download the MAGICC model.\n"
+        "  url        : {url}\n"
+        "  cache path : {dest}\n"
+        "  reason     : {reason}\n"
+        "MAGICC needs the frozen V5 ONNX model ({size:,} B, SHA256 {sha}). If "
+        "this machine has no network access, fetch that file on a connected "
+        "machine -- either from the release-asset URL above, or from a "
+        "`git clone` of https://github.com/renmaotian/magicc with Git LFS "
+        "(models/{fname}) -- copy it to the cache path above, and re-run. Its "
+        "checksum is verified on every run, so a hand-placed copy is checked "
+        "exactly like a downloaded one. Alternatively point MAGICC at a copy "
+        "you already have with: magicc predict --model /path/to/{fname} "
+        "...".format(url=MODEL_URL, dest=MODEL_CACHE_PATH, reason=reason,
+                     size=MODEL_BYTES, sha=MODEL_SHA256, fname=MODEL_FILENAME)
+    )
+
+
+def _download_model(dest: Path) -> None:
+    """
+    Download the release asset to *dest*, verifying its SHA256 before it is
+    put in place.
+
+    The download lands on a temporary file in the same directory and is only
+    renamed into *dest* after the checksum matches, so an interrupted or
+    corrupt transfer can never be mistaken for a cached model by a later run.
+    """
+    import urllib.request
+
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    print(
+        "MAGICC: downloading model {fname} ({mb:.0f} MB) from {url} to {dest}; "
+        "its SHA256 will be verified against {sha} before use.".format(
+            fname=MODEL_FILENAME, mb=MODEL_BYTES / 1e6, url=MODEL_URL,
+            dest=dest, sha=MODEL_SHA256,
+        ),
+        flush=True,
+    )
+
+    tmp = dest.with_name('{name}.part.{pid}'.format(name=dest.name, pid=os.getpid()))
+    try:
+        urllib.request.urlretrieve(MODEL_URL, str(tmp))
+    except BaseException as exc:                     # noqa: BLE001 - re-raised below
+        try:
+            tmp.unlink()
+        except OSError:
+            pass
+        if isinstance(exc, KeyboardInterrupt):
+            raise
+        raise RuntimeError(
+            _offline_help('{}: {}'.format(type(exc).__name__, exc))
+        ) from exc
+
+    try:
+        _verify_model(tmp, 'freshly downloaded from ' + MODEL_URL)
+    except ModelIntegrityError:
+        try:
+            tmp.unlink()
+        except OSError:
+            pass
+        raise
+
+    tmp.replace(dest)
+    print(
+        "MAGICC: model download complete and SHA256 verified ({sha}).".format(
+            sha=MODEL_SHA256,
+        ),
+        flush=True,
+    )
 
 def _resolve_data_path(*candidates: str) -> str:
     """Return the first candidate path that exists, or the last one as default."""
@@ -52,25 +197,31 @@ def _resolve_data_path(*candidates: str) -> str:
     return candidates[-1]
 
 def _ensure_model() -> str:
-    """Ensure the ONNX model is available, downloading from GitHub if needed."""
+    """
+    Return the path to the frozen V5 ONNX model, fetching it if necessary.
+
+    Resolution order is unchanged: installed package data, then the development
+    project layout, then the user cache ``~/.magicc``.  What is new in 0.3.2 is
+    that **whichever copy is found, its SHA256 is verified against
+    :data:`MODEL_SHA256` before it is returned** -- so a corrupted or tampered
+    cache is caught on every run, not only on the run that downloaded it -- and
+    that a model which is not present is fetched from the immutable release
+    asset of this package's own version rather than from a mutable branch ref.
+    """
     # Check package data, project layout, then user cache
     candidates = [
         _PACKAGE_DIR / 'data' / MODEL_FILENAME,
         _PROJECT_DIR / 'models' / MODEL_FILENAME,
-        _USER_DATA_DIR / MODEL_FILENAME,
+        MODEL_CACHE_PATH,
     ]
     for p in candidates:
         if p.is_file() and p.stat().st_size > 1_000_000:  # >1MB sanity check
+            _verify_model(p, 'already present on disk')
             return str(p)
 
-    # Download to user cache
-    dest = _USER_DATA_DIR / MODEL_FILENAME
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    print(f"Downloading MAGICC model to {dest} ...")
-    import urllib.request
-    urllib.request.urlretrieve(MODEL_URL, str(dest))
-    print(f"Download complete ({dest.stat().st_size / 1e6:.1f} MB)")
-    return str(dest)
+    # Not present anywhere: fetch the release asset into the user cache.
+    _download_model(MODEL_CACHE_PATH)
+    return str(MODEL_CACHE_PATH)
 
 # Package data paths (installed via pip) vs project layout paths (development)
 DEFAULT_NORM_PATH = _resolve_data_path(
@@ -817,7 +968,13 @@ def build_parser() -> argparse.ArgumentParser:
     )
     predict_parser.add_argument(
         '--model', default=None,
-        help='Path to ONNX model (default: auto-download from GitHub)',
+        help='Path to ONNX model. Default: use the frozen V5 model, taken from '
+             'the installed package, then the project layout, then '
+             f'{MODEL_CACHE_PATH}; if it is on none of those it is downloaded '
+             f'from {MODEL_URL}. Whichever of those is used, its SHA256 must '
+             f'equal {MODEL_SHA256} or MAGICC exits with an error. An explicit '
+             '--model path is used as given and is NOT checksum-verified, so '
+             'that alternative models can be evaluated deliberately',
     )
     predict_parser.add_argument(
         '--normalization', default=DEFAULT_NORM_PATH,

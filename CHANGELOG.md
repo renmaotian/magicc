@@ -4,6 +4,75 @@ All notable changes to MAGICC are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] — 2026-08-27
+
+**A reproducibility defect in how the model was obtained, stated plainly.**
+
+The model is unchanged. **V5 is still the released model**, SHA256
+`b84346650ce21a66acd488e9f2eab1ca72333ba4dd50fed79070ec182b2b3096`, and every
+prediction this release makes is byte-identical to one made by 0.3.0 or 0.3.1
+on the same input — verified on a 25-genome panel across plain FASTA, gzip,
+`--input-list` and `--extension auto` at 1 and 4 threads. Only the way the
+model is *fetched and validated* has changed.
+
+### Fixed
+
+- **The model was downloaded from a mutable branch URL, without checksum
+  verification.** 0.3.0 and 0.3.1 do not ship the 162 MB ONNX model in the
+  PyPI wheel or sdist (it exceeds PyPI's per-file limit), so on first run the
+  CLI fetched it from
+  `https://github.com/renmaotian/magicc/raw/main/models/magicc_v5.onnx`.
+  That reference is the **`main` branch**, not a tag: any later commit touching
+  the model would silently change what an *already released* version of MAGICC
+  downloads. The only validation performed was `size > 1 MB`, so a wrong,
+  truncated or substituted model would have been used without complaint. An
+  install advertised as reproducible therefore depended on a mutable remote
+  artefact.
+
+  **0.3.2 fetches the immutable release asset of its own version**,
+  `https://github.com/renmaotian/magicc/releases/download/v0.3.2/magicc_v5.onnx`
+  — a GitHub release asset, frozen once published — and **verifies SHA256
+  against `b84346…b3096` before the model is used**, failing with an error that
+  names the expected digest, the observed digest and the offending file. The
+  expected hash lives in exactly one place, `magicc.cli.MODEL_SHA256`.
+
+  This was the packaged-CLI half of the defect fixed inside the Docker image in
+  0.3.1: the image was made self-contained, but `pip install magicc` was not.
+
+### Added
+
+- **The checksum is verified on every run, not only on first download.** A
+  model found in the installed package, in the project layout, or already in
+  `~/.magicc` is hashed before it is loaded, so a cache that is corrupted or
+  altered after it was written is caught on the next invocation rather than
+  never. Cost: ~0.4 s per run on the reference host.
+- **A download announcement.** The first fetch prints one line naming the file,
+  its size, the URL it comes from, the cache path it goes to, and the SHA256 it
+  will be checked against — the download is no longer silent.
+- **An actionable offline error.** If the download fails, MAGICC reports the
+  URL, the cache path (`~/.magicc/magicc_v5.onnx`), the reason, the expected
+  size and hash, and the two ways to supply the file by hand (copy it to the
+  cache path, or pass `--model`). It exits 1 with that message instead of an
+  unhandled `URLError` traceback. `README.md` documents the same route.
+- **Atomic installation of a downloaded model.** The transfer lands on a
+  temporary file beside the cache path and is renamed into place only after the
+  checksum matches, so an interrupted or rejected download cannot leave a file
+  that a later run would treat as a valid cache.
+- **15 regression tests** (`tests/test_model_integrity.py`) covering the URL
+  form (asserting it is a release asset and not a branch ref), the digest
+  helpers, cached-model verification, corrupted-cache rejection, download and
+  verification over `file://`, rejection of a wrong artefact with nothing left
+  behind, and the offline error's contents. The suite is now **92 tests**.
+
+### Changed
+
+- `--model` still accepts an explicit path and is deliberately **not**
+  checksum-verified, so alternative models (e.g. the taxonomic-holdout models)
+  can be evaluated on purpose. Its `--help` text now says so.
+- Container image tags and labels move from `0.3.1` to `0.3.2`. The images were
+  already immune to this defect — they bundle the model — and their build-time
+  smoke test still asserts that no download occurs.
+
 ## [0.3.1] — 2026-08-25
 
 The model is unchanged. **V5 is still the released model**, SHA256
@@ -116,6 +185,7 @@ which was present in the 0.3.0 distribution.
 
 - First public release (model V3).
 
+[0.3.2]: https://github.com/renmaotian/magicc/releases/tag/v0.3.2
 [0.3.1]: https://github.com/renmaotian/magicc/releases/tag/v0.3.1
 [0.3.0]: https://pypi.org/project/magicc/0.3.0/
 [0.2.1]: https://pypi.org/project/magicc/0.2.1/

@@ -133,7 +133,7 @@ special-cased to obtain the results above.
 # 1. determinism suite (needs the package installed and the repo data)
 python scripts/115_determinism_check.py --n-genomes 24 --max-threads 4
 
-# 2. unit / CLI test suite (77 tests)
+# 2. unit / CLI test suite (92 tests)
 python -m pytest tests/ -q
 
 # 3. container equivalence

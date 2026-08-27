@@ -1,6 +1,6 @@
 {% set name = "magicc" %}
-{% set version = "0.3.1" %}
-{% set sha256 = "aa36d2091487af864f264c1caed21ab67aa885cd6a062291629b7b3607e2926c" %}
+{% set version = "0.3.2" %}
+{% set sha256 = "1c116204df801c27dac7dbdfc94dd525b84fc11a82ba003ccff15ae5d0e122b1" %}
 
 package:
   name: {{ name|lower }}
@@ -65,8 +65,11 @@ about:
     Input may be a directory, a single FASTA file, or a text file listing genome
     paths (--input-list); plain and gzip-compressed FASTA are both accepted.
 
-    NOTE: on first use MAGICC downloads its ~170 MB ONNX model to ~/.magicc.
-    Set --model to point at a pre-staged copy for fully offline operation.
+    NOTE: on first use MAGICC downloads its ~170 MB ONNX model to ~/.magicc,
+    from the immutable GitHub release asset for this exact version, and
+    verifies its SHA256 before use (and on every subsequent run). For fully
+    offline operation, place the file at ~/.magicc/magicc_v5.onnx yourself or
+    point --model at a pre-staged copy.
   doc_url: https://github.com/renmaotian/magicc#readme
   dev_url: https://github.com/renmaotian/magicc
 

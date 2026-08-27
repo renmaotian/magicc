@@ -5,8 +5,8 @@
 #   bash containers/build_containers.sh
 #
 # Produces:
-#   docker image  magicc:0.3.1
-#   containers/magicc_0.3.1.sif
+#   docker image  magicc:0.3.2
+#   containers/magicc_0.3.2.sif
 #
 # Both embed the frozen V5 ONNX model and fail to build if its SHA256 does not
 # match results/revision/model_card.json.
@@ -14,8 +14,8 @@
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-TAG="magicc:0.3.1"
-SIF="${REPO}/containers/magicc_0.3.1.sif"
+TAG="magicc:0.3.2"
+SIF="${REPO}/containers/magicc_0.3.2.sif"
 MODEL_SHA="b84346650ce21a66acd488e9f2eab1ca72333ba4dd50fed79070ec182b2b3096"
 
 cd "${REPO}"
@@ -42,7 +42,7 @@ else
    Install it (conda-forge provides an unprivileged build:
        mamba create -n apptainer -c conda-forge apptainer=1.4.5
    ) and re-run, or run the documented command by hand:
-       apptainer build containers/magicc_0.3.1.sif docker-daemon://magicc:0.3.1
+       apptainer build containers/magicc_0.3.2.sif docker-daemon://magicc:0.3.2
 EOF
 fi
 

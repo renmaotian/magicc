@@ -10,11 +10,79 @@ Accurate and ultra-fast genome quality assessment using core gene k-mer profiles
 
 ## Installation
 
+MAGICC (`v0.3.3`) can be installed and run on Linux and macOS desktops/laptops and high-performance computing (HPC) clusters via **Pixi**, **Bioconda / Conda / Mamba**, **Docker**, **Apptainer / Singularity**, or **PyPI (`pip`)**.
+
+### 1. Pixi (Desktops/Laptops & HPC, no root required)
+
+Global CLI installation (via Bioconda):
+
+```bash
+pixi global install -c conda-forge -c bioconda magicc
+magicc predict --input /path/to/genomes --output predictions.tsv --threads 8
+```
+
+Or run directly from a locked repository workspace (`pixi.toml` + `pixi.lock`, supporting `linux-64`, `linux-aarch64`, `osx-64`, and `osx-arm64` with CPU-only `onnxruntime`):
+
+```bash
+git clone https://github.com/renmaotian/magicc.git
+cd magicc
+pixi run magicc predict --input /path/to/genomes --output predictions.tsv --threads 8
+
+# On HPC login nodes: pre-fetch and SHA-256-verify ~/.magicc/magicc_v5.onnx
+# before submitting jobs to air-gapped compute nodes
+pixi run download-model
+```
+
+### 2. Bioconda / Conda / Mamba
+
+```bash
+mamba create -n magicc -c conda-forge -c bioconda magicc
+conda activate magicc
+magicc predict --input /path/to/genomes --output predictions.tsv --threads 8
+```
+
+For an exact, solver-free reproduction of the manuscript's pinned environment (`conda/environment.yml`, `conda/conda-lock.yml`, and `conda/conda-{linux-64,osx-64,osx-arm64}.lock`):
+
+```bash
+conda-lock install --name magicc conda/conda-lock.yml
+conda activate magicc && pip install --no-deps .
+```
+
+### 3. Public Docker Image (Desktops/Laptops — self-contained & offline-ready)
+
+The official container image (`ghcr.io/renmaotian/magicc:0.3.3`) bundles the frozen V5 ONNX model inside the installed package and verifies its SHA256 at build time and on every run, so **nothing is downloaded at run time** (works with `--network none`):
+
+```bash
+docker pull ghcr.io/renmaotian/magicc:0.3.3
+docker run --rm -v "$PWD":/data ghcr.io/renmaotian/magicc:0.3.3 \
+    predict --input /data/genomes --output /data/predictions.tsv --threads 8
+```
+
+To build reproducibly from source (`docker/Dockerfile` pins the base image by digest and every Python wheel by SHA256 via `docker/requirements-lock.txt`, verifying against `results/revision/model_card.json`):
+
+```bash
+docker build -f docker/Dockerfile -t magicc:0.3.3 .
+```
+
+### 4. Apptainer / Singularity (HPC Clusters — rootless & air-gapped compute nodes)
+
+Pull the self-contained GHCR image directly to a `.sif` file on an HPC login node (requires **no root privileges** and embeds the frozen V5 model for 100% offline worker execution):
+
+```bash
+apptainer pull magicc_0.3.3.sif docker://ghcr.io/renmaotian/magicc:0.3.3
+apptainer run --containall --bind "$PWD":/data magicc_0.3.3.sif \
+    predict --input /data/genomes --output /data/predictions.tsv --threads 8
+```
+
+> **Shared multi-user HPC nodes:** `--containall` mounts a private `/tmp` inside the container for Numba's JIT cache (`NUMBA_CACHE_DIR=/tmp/numba_cache`). If you run without `--containall` on a shared node, pass `--env NUMBA_CACHE_DIR="${TMPDIR:-/tmp}/numba_${USER}"` to avoid `/tmp` permission collisions across users.
+
+### 5. PyPI (`pip`)
+
 ```bash
 pip install magicc
 ```
 
-Or from source:
+Or from source (Git LFS is required if cloning the bundled ~170 MB ONNX model):
 
 ```bash
 git clone https://github.com/renmaotian/magicc.git
@@ -22,18 +90,12 @@ cd magicc
 pip install -e .
 ```
 
-**Note**: Git LFS is required to clone the repository (the ONNX model is ~180 MB).
-
 ### Where the model comes from, and offline use
 
-The 162 MB V5 ONNX model is **not inside the PyPI wheel or sdist** — it exceeds
-PyPI's per-file limit. `pip install magicc` therefore needs network access
-**once**, on the first run, to fetch it. MAGICC looks for the model in this
-order:
+The 162 MiB (`169,658,949` B) V5 ONNX model is **not inside the PyPI wheel, sdist, or Bioconda package** — it exceeds PyPI and Bioconda package size limits. Non-container installs (`pip`, `Bioconda`, `Pixi`) therefore need network access **once**, on the first run (or via `pixi run download-model` on an HPC login node), to fetch it. MAGICC looks for the model in this order:
 
-1. the installed package's own `data/` directory (this is where the container
-   puts it, which is why the container never downloads anything);
-2. `models/magicc_v5.onnx` relative to the package (a source checkout);
+1. the installed package's own `data/` directory (this is where the GHCR Docker / Apptainer container puts it, which is why containers never download anything);
+2. `models/magicc_v5.onnx` relative to the package (a Git-LFS source checkout);
 3. `~/.magicc/magicc_v5.onnx` — the run-time cache;
 
 and only if none of those exists does it download
@@ -49,52 +111,7 @@ refuses to run**, naming the expected and observed digests. The check runs on
 every invocation, so a corrupted or altered cache is caught even long after it
 was written.
 
-**Offline / air-gapped hosts.** Fetch `magicc_v5.onnx` on a connected machine
-(from the release-asset URL above, or from a Git-LFS clone of this repository),
-copy it to
-
-```
-~/.magicc/magicc_v5.onnx
-```
-
-and run normally — no network is touched, and the hand-placed copy is checksum
-verified exactly like a downloaded one. `--model /path/to/magicc_v5.onnx` also
-works and is deliberately *not* checksum-verified, so that alternative models
-can be evaluated on purpose. The container route below avoids the question
-entirely.
-
-### Container (recommended for reproducible or offline use)
-
-The container bundles the frozen V5 model, so nothing is downloaded at run time
-and the exact model is guaranteed by checksum.
-
-```bash
-# Docker
-docker build -f docker/Dockerfile -t magicc:0.3.3 .
-docker run --rm -v "$PWD":/data magicc:0.3.3 \
-    predict --input /data/genomes --output /data/predictions.tsv --threads 8
-
-# Apptainer / Singularity (HPC)
-apptainer build magicc_0.3.3.sif docker-daemon://magicc:0.3.3
-apptainer run --containall --bind "$PWD":/data magicc_0.3.3.sif \
-    predict --input /data/genomes --output /data/predictions.tsv --threads 8
-```
-
-The base image is pinned by digest and every Python dependency is pinned to an
-exact version and verified against a recorded SHA256
-(`docker/requirements-lock.txt`). The build fails if the bundled model does not
-match `results/revision/model_card.json`.
-
-### Pinned conda environment
-
-```bash
-conda-lock install --name magicc conda/conda-lock.yml   # exact, solver-free
-conda activate magicc && pip install --no-deps .
-```
-
-`conda/environment.yml` is the human-readable source;
-`conda/conda-lock.yml` and `conda/conda-{linux-64,osx-64,osx-arm64}.lock` are the
-fully resolved locks.
+**Offline / air-gapped hosts.** Either use the self-contained container (`ghcr.io/renmaotian/magicc:0.3.3` / `magicc_0.3.3.sif`), or fetch `magicc_v5.onnx` on a connected machine/login node and place it at `~/.magicc/magicc_v5.onnx` — no network is touched on compute nodes, and the cached copy is checksum-verified identically. `--model /path/to/magicc_v5.onnx` also works and is deliberately *not* checksum-verified, so that alternative models can be evaluated on purpose.
 
 ### Dependencies
 

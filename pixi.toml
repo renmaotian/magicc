@@ -1,0 +1,50 @@
+# =============================================================================
+# MAGICC — Pixi workspace manifest (https://pixi.sh)
+#
+# Provides reproducible, cross-platform installation and execution across Linux
+# and macOS desktops/laptops and HPC clusters without root privileges:
+#
+#   git clone https://github.com/renmaotian/magicc.git
+#   cd magicc
+#   pixi run magicc predict --input /path/to/genomes --output predictions.tsv
+#
+# For air-gapped HPC compute nodes, run once on a connected login node:
+#   pixi run download-model
+# which caches and SHA-256-verifies ~/.magicc/magicc_v5.onnx for worker jobs.
+# =============================================================================
+
+[workspace]
+name = "magicc-workspace"
+version = "0.3.3"
+description = "MAGICC: Metagenome-Assembled Genome Inference of Completeness and Contamination"
+authors = ["Renmao Tian"]
+license = "MIT"
+channels = ["conda-forge"]
+platforms = ["linux-64", "linux-aarch64", "osx-64", "osx-arm64"]
+
+[dependencies]
+# Upper bound <3.14 ensures Intel macOS (osx-64) resolves conda-forge
+# onnxruntime 1.22.2 cleanly alongside Linux and Apple Silicon 1.31.x builds.
+python = ">=3.11,<3.14"
+numpy = ">=1.20"
+numba = ">=0.53"
+scipy = ">=1.7"
+h5py = ">=3.0"
+# Select CPU builds explicitly so GPU-equipped hosts/login nodes do not pull
+# multi-gigabyte CUDA runtime packages (MAGICC uses CPUExecutionProvider).
+onnxruntime = { version = ">=1.18", build = "*cpu*" }
+pytest = ">=7.0"
+pip = ">=23.0"
+setuptools = ">=68.0"
+wheel = ">=0.40"
+
+[pypi-options]
+no-build-isolation = ["magicc"]
+
+[pypi-dependencies]
+magicc = { path = ".", editable = true }
+
+[tasks]
+predict = { cmd = "magicc predict", description = "Run MAGICC genome completeness and contamination prediction" }
+test = { cmd = "pytest -q", description = "Run the MAGICC test suite" }
+download-model = { cmd = "python -c \"from magicc.cli import _ensure_model; p = _ensure_model(); print('Verified model cached at:', p)\"", description = "Pre-download and SHA-256-verify magicc_v5.onnx (e.g., on HPC login nodes before offline batch jobs)" }
